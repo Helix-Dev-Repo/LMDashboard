@@ -1,0 +1,661 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-21T13:52:04Z",
+  "title": "Design System: LM Dashboard",
+  "extensions": {
+    "themes": {
+      "default": "dark",
+      "dark": {
+        "selector": ":root, .lm-dashboard.theme-dark",
+        "colorScheme": "dark"
+      },
+      "light": {
+        "selector": ":root:has(.lm-dashboard.theme-light), .lm-dashboard.theme-light",
+        "colorScheme": "light",
+        "overrides": {
+          "chip-pressed-text": "#0f6a30",
+          "chip-danger-pressed-text": "#a51818"
+        }
+      },
+      "classic": {
+        "selector": ":root:has(.lm-dashboard.theme-classic), .lm-dashboard.theme-classic",
+        "colorScheme": "dark",
+        "overrides": {
+          "--font-sans": "var(--font-mono)",
+          "--radius": "0",
+          "--radius-lg": "0",
+          "control-hover-text": "#88ff88"
+        },
+        "effects": {
+          "glow": "text-shadow: 0 0 5px (inherited)",
+          "scanlines": "repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,0.1) 2px 4px), fixed, optional",
+          "vignette": "radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.5) 100%), fixed, optional",
+          "brightness": "filter: brightness(0.85 to 1.5) on the shell"
+        }
+      }
+    },
+    "colorMeta": {
+      "console-black": {
+        "role": "neutral",
+        "displayName": "Console Black",
+        "canonical": "#0f1113",
+        "cssVar": "--bg",
+        "purpose": "Page background.",
+        "themes": {
+          "dark": "#0f1113",
+          "light": "#f5f6f5",
+          "classic": "#0c0c0c"
+        },
+        "tonalRamp": [
+          "oklch(15% 0.004 240)",
+          "oklch(25% 0.004 240)",
+          "oklch(35% 0.004 240)",
+          "oklch(45% 0.004 240)",
+          "oklch(55% 0.004 240)",
+          "oklch(65% 0.004 240)",
+          "oklch(80% 0.004 240)",
+          "oklch(95% 0.004 240)"
+        ]
+      },
+      "panel-charcoal": {
+        "role": "neutral",
+        "displayName": "Panel Charcoal",
+        "canonical": "#16191b",
+        "cssVar": "--surface",
+        "purpose": "List, controls, inputs, dialog.",
+        "themes": {
+          "dark": "#16191b",
+          "light": "#ffffff",
+          "classic": "#0c0c0c"
+        },
+        "tonalRamp": [
+          "oklch(15% 0.005 230)",
+          "oklch(25% 0.005 230)",
+          "oklch(35% 0.005 230)",
+          "oklch(45% 0.005 230)",
+          "oklch(55% 0.005 230)",
+          "oklch(65% 0.005 230)",
+          "oklch(80% 0.005 230)",
+          "oklch(95% 0.005 230)"
+        ]
+      },
+      "row-hover-charcoal": {
+        "role": "neutral",
+        "displayName": "Row-Hover Charcoal",
+        "canonical": "#1c2023",
+        "cssVar": "--surface-2",
+        "purpose": "Row and button hover.",
+        "themes": {
+          "dark": "#1c2023",
+          "light": "#f0f2f1",
+          "classic": "#0c0c0c"
+        },
+        "tonalRamp": [
+          "oklch(15% 0.007 235)",
+          "oklch(25% 0.007 235)",
+          "oklch(35% 0.007 235)",
+          "oklch(45% 0.007 235)",
+          "oklch(55% 0.007 235)",
+          "oklch(65% 0.007 235)",
+          "oklch(80% 0.007 235)",
+          "oklch(95% 0.007 235)"
+        ]
+      },
+      "pressed-graphite": {
+        "role": "neutral",
+        "displayName": "Pressed Graphite",
+        "canonical": "#262b2e",
+        "cssVar": "--surface-3",
+        "purpose": "Selected segment, ghost hover.",
+        "themes": {
+          "dark": "#262b2e",
+          "light": "#e3e7e5",
+          "classic": "#143a14"
+        },
+        "tonalRamp": [
+          "oklch(15% 0.008 230)",
+          "oklch(25% 0.008 230)",
+          "oklch(35% 0.008 230)",
+          "oklch(45% 0.008 230)",
+          "oklch(55% 0.008 230)",
+          "oklch(65% 0.008 230)",
+          "oklch(80% 0.008 230)",
+          "oklch(95% 0.008 230)"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#262a2e",
+        "cssVar": "--border",
+        "purpose": "Row dividers, list outline, footer rule.",
+        "themes": {
+          "dark": "#262a2e",
+          "light": "#e1e4e2",
+          "classic": "#143a14"
+        },
+        "tonalRamp": [
+          "oklch(15% 0.009 250)",
+          "oklch(25% 0.009 250)",
+          "oklch(35% 0.009 250)",
+          "oklch(45% 0.009 250)",
+          "oklch(55% 0.009 250)",
+          "oklch(65% 0.009 250)",
+          "oklch(80% 0.009 250)",
+          "oklch(95% 0.009 250)"
+        ]
+      },
+      "control-edge": {
+        "role": "neutral",
+        "displayName": "Control Edge",
+        "canonical": "#363c41",
+        "cssVar": "--border-strong",
+        "purpose": "Button, segmented, badge, key-cap and dialog outlines.",
+        "themes": {
+          "dark": "#363c41",
+          "light": "#c9cfcb",
+          "classic": "#1a6a1a"
+        },
+        "tonalRamp": [
+          "oklch(15% 0.012 240)",
+          "oklch(25% 0.012 240)",
+          "oklch(35% 0.012 240)",
+          "oklch(45% 0.012 240)",
+          "oklch(55% 0.012 240)",
+          "oklch(65% 0.012 240)",
+          "oklch(80% 0.012 240)",
+          "oklch(95% 0.012 240)"
+        ]
+      },
+      "field-edge": {
+        "role": "neutral",
+        "displayName": "Field Edge",
+        "canonical": "#636b66",
+        "cssVar": "--border-input",
+        "purpose": "Input edges, 3:1 minimum.",
+        "themes": {
+          "dark": "#636b66",
+          "light": "#868f8a",
+          "classic": "#2ea82e"
+        },
+        "tonalRamp": [
+          "oklch(15% 0.01 160)",
+          "oklch(25% 0.01 160)",
+          "oklch(35% 0.01 160)",
+          "oklch(45% 0.01 160)",
+          "oklch(55% 0.01 160)",
+          "oklch(65% 0.01 160)",
+          "oklch(80% 0.01 160)",
+          "oklch(95% 0.01 160)"
+        ]
+      },
+      "cold-white": {
+        "role": "neutral",
+        "displayName": "Cold White",
+        "canonical": "#e3e6e4",
+        "cssVar": "--fg",
+        "purpose": "Primary text.",
+        "themes": {
+          "dark": "#e3e6e4",
+          "light": "#1b1f1d",
+          "classic": "#33ff33"
+        },
+        "tonalRamp": [
+          "oklch(15% 0.004 160)",
+          "oklch(25% 0.004 160)",
+          "oklch(35% 0.004 160)",
+          "oklch(45% 0.004 160)",
+          "oklch(55% 0.004 160)",
+          "oklch(65% 0.004 160)",
+          "oklch(80% 0.004 160)",
+          "oklch(95% 0.004 160)"
+        ]
+      },
+      "instrument-gray": {
+        "role": "neutral",
+        "displayName": "Instrument Gray",
+        "canonical": "#939b96",
+        "cssVar": "--fg-muted",
+        "purpose": "URLs, summary, column header, labels, latency.",
+        "themes": {
+          "dark": "#939b96",
+          "light": "#58615c",
+          "classic": "#22bb22"
+        },
+        "tonalRamp": [
+          "oklch(15% 0.01 160)",
+          "oklch(25% 0.01 160)",
+          "oklch(35% 0.01 160)",
+          "oklch(45% 0.01 160)",
+          "oklch(55% 0.01 160)",
+          "oklch(65% 0.01 160)",
+          "oklch(80% 0.01 160)",
+          "oklch(95% 0.01 160)"
+        ]
+      },
+      "idle-gray": {
+        "role": "neutral",
+        "displayName": "Idle Gray",
+        "canonical": "#858d88",
+        "cssVar": "--fg-subtle",
+        "purpose": "Intervals, placeholders, footer, disabled.",
+        "themes": {
+          "dark": "#858d88",
+          "light": "#646c66",
+          "classic": "#2ea82e"
+        },
+        "tonalRamp": [
+          "oklch(15% 0.01 160)",
+          "oklch(25% 0.01 160)",
+          "oklch(35% 0.01 160)",
+          "oklch(45% 0.01 160)",
+          "oklch(55% 0.01 160)",
+          "oklch(65% 0.01 160)",
+          "oklch(80% 0.01 160)",
+          "oklch(95% 0.01 160)"
+        ]
+      },
+      "phosphor-green": {
+        "role": "primary",
+        "displayName": "Phosphor Green",
+        "canonical": "#4ade80",
+        "cssVar": "--accent",
+        "purpose": "The single accent: prompt, caret, cursor, focus, pressed chips, Save, sparkline.",
+        "themes": {
+          "dark": "#4ade80",
+          "light": "#15803d",
+          "classic": "#33ff33"
+        },
+        "tonalRamp": [
+          "oklch(15% 0.18 151)",
+          "oklch(25% 0.18 151)",
+          "oklch(35% 0.18 151)",
+          "oklch(45% 0.18 151)",
+          "oklch(55% 0.18 151)",
+          "oklch(65% 0.18 151)",
+          "oklch(80% 0.18 151)",
+          "oklch(95% 0.18 151)"
+        ]
+      },
+      "phosphor-ink": {
+        "role": "primary",
+        "displayName": "Phosphor Ink",
+        "canonical": "#06240f",
+        "cssVar": "--accent-fg",
+        "purpose": "Text on filled accent.",
+        "themes": {
+          "dark": "#06240f",
+          "light": "#ffffff",
+          "classic": "#0c0c0c"
+        },
+        "tonalRamp": [
+          "oklch(15% 0.06 150)",
+          "oklch(25% 0.06 150)",
+          "oklch(35% 0.06 150)",
+          "oklch(45% 0.06 150)",
+          "oklch(55% 0.06 150)",
+          "oklch(65% 0.06 150)",
+          "oklch(80% 0.06 150)",
+          "oklch(95% 0.06 150)"
+        ]
+      },
+      "status-up": {
+        "role": "status",
+        "displayName": "Status Up",
+        "canonical": "#4ade80",
+        "cssVar": "--ok",
+        "purpose": "Up counts, dots, 2xx status.",
+        "themes": {
+          "dark": "#4ade80",
+          "light": "#137a3a",
+          "classic": "#33ff33"
+        },
+        "tonalRamp": [
+          "oklch(15% 0.18 151)",
+          "oklch(25% 0.18 151)",
+          "oklch(35% 0.18 151)",
+          "oklch(45% 0.18 151)",
+          "oklch(55% 0.18 151)",
+          "oklch(65% 0.18 151)",
+          "oklch(80% 0.18 151)",
+          "oklch(95% 0.18 151)"
+        ]
+      },
+      "status-redirect-amber": {
+        "role": "status",
+        "displayName": "Redirect Amber",
+        "canonical": "#facc15",
+        "cssVar": "--warn",
+        "purpose": "Redirect counts, dots, 3xx status.",
+        "themes": {
+          "dark": "#facc15",
+          "light": "#a34a06",
+          "classic": "#ffff33"
+        },
+        "tonalRamp": [
+          "oklch(15% 0.17 92)",
+          "oklch(25% 0.17 92)",
+          "oklch(35% 0.17 92)",
+          "oklch(45% 0.17 92)",
+          "oklch(55% 0.17 92)",
+          "oklch(65% 0.17 92)",
+          "oklch(80% 0.17 92)",
+          "oklch(95% 0.17 92)"
+        ]
+      },
+      "status-down-red": {
+        "role": "status",
+        "displayName": "Down Red",
+        "canonical": "#f87171",
+        "cssVar": "--err",
+        "purpose": "Down counts, dots, failure bars, errors, Delete on hover.",
+        "themes": {
+          "dark": "#f87171",
+          "light": "#c81e1e",
+          "classic": "#ff4444"
+        },
+        "tonalRamp": [
+          "oklch(15% 0.17 22)",
+          "oklch(25% 0.17 22)",
+          "oklch(35% 0.17 22)",
+          "oklch(45% 0.17 22)",
+          "oklch(55% 0.17 22)",
+          "oklch(65% 0.17 22)",
+          "oklch(80% 0.17 22)",
+          "oklch(95% 0.17 22)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page title (with blinking mono underscore) and error-page heading. Classic: uppercase, 400, 0.2em."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Add/Edit dialog title. Classic: uppercase, 400, 0.1em."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Base text and inputs; link names at weight 500."
+      },
+      "control": {
+        "displayName": "Control",
+        "purpose": "Buttons, segments, chips; 12px on small buttons, 600 on Primary and Add link."
+      },
+      "summary": {
+        "displayName": "Summary (mono)",
+        "purpose": "Status summary line and search prompt; the down count steps to 15px/700."
+      },
+      "data": {
+        "displayName": "Data (mono)",
+        "purpose": "Status code and phrase, latency, interval."
+      },
+      "url": {
+        "displayName": "URL (mono)",
+        "purpose": "Link URL beside its name."
+      },
+      "label": {
+        "displayName": "Label (mono, uppercase)",
+        "purpose": "Column header (0.06em), group headings (0.08em), INT/EXT badge (0.04em), footer key caps."
+      }
+    },
+    "shadows": [
+      {
+        "name": "dialog-lift",
+        "value": "0 16px 48px rgba(0, 0, 0, 0.45)",
+        "purpose": "Add/Edit dialog; the only elevated surface. Backdrop rgba(0, 0, 0, 0.55)."
+      },
+      {
+        "name": "reconnect-lift",
+        "value": "0 12px 40px rgba(0, 0, 0, 0.45)",
+        "purpose": "Blazor reconnect modal. Backdrop rgba(0, 0, 0, 0.6)."
+      },
+      {
+        "name": "input-focus-halo",
+        "value": "0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent)",
+        "purpose": "Focused input; --err at 22% when aria-invalid."
+      },
+      {
+        "name": "top-match-ring",
+        "value": "inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent)",
+        "purpose": "Row Enter would open, over a 5% accent tint. Classic uses a 1px dashed outline instead."
+      },
+      {
+        "name": "paused-dot-ring",
+        "value": "inset 0 0 0 1.5px var(--fg-subtle)",
+        "purpose": "Hollow status dot for paused links."
+      },
+      {
+        "name": "classic-dialog",
+        "value": "0 0 0 2px #000, 0 0 30px rgba(51, 255, 51, 0.12)",
+        "purpose": "Classic dialog keyline and phosphor bloom."
+      },
+      {
+        "name": "classic-glow",
+        "value": "text-shadow: 0 0 5px",
+        "purpose": "Classic only: inherited glow in each element's own color; 2px on small mono, 10px on the title."
+      }
+    ],
+    "motion": [
+      {
+        "name": "cursor-blink",
+        "value": "1.06s step-end infinite (opacity 0 at 50%)",
+        "purpose": "Blinking underscore after the title, empty state and reconnect message."
+      },
+      {
+        "name": "ping-pulse",
+        "value": "1s ease-in-out infinite (opacity 0.35 at 50%)",
+        "purpose": "Status dot while a check is in flight."
+      },
+      {
+        "name": "dialog-in",
+        "value": "140ms ease-out, from opacity 0 and translateY(6px)",
+        "purpose": "Dialog opening."
+      },
+      {
+        "name": "actions-reveal",
+        "value": "opacity 120ms ease-out",
+        "purpose": "Row actions appearing on hover or focus-within."
+      },
+      {
+        "name": "reconnect-fade",
+        "value": "0.5s ease-in-out, 0.3s delay",
+        "purpose": "Reconnect modal fade-in."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion: reduce",
+        "purpose": "Blink, pulse, dialog rise and reveal transition all stop."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "narrow",
+        "value": "max-width: 760px",
+        "purpose": "Two-line rows, no sparkline/interval/column header/status phrase, actions behind More, single-column dialog form."
+      },
+      {
+        "name": "touch",
+        "value": "pointer: coarse",
+        "purpose": "40px controls, 36px small buttons, 44px More toggle, padded down-count tap area."
+      },
+      {
+        "name": "hover-capable",
+        "value": "hover: hover",
+        "purpose": "Row hover tint, hidden-until-intent actions, Classic inverse hover."
+      },
+      {
+        "name": "no-hover",
+        "value": "hover: none",
+        "purpose": "Function-key legend hidden."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Default Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "Quiet outlined button for routine actions (Cancel, Show all links, Theme).",
+      "html": "<button class=\"ds-btn\">Show all links</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 34px; padding: 0 12px; border: 1px solid var(--border-strong, #363c41); border-radius: 6px; background-color: var(--surface, #16191b); color: var(--fg, #e3e6e4); font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 13px; white-space: nowrap; cursor: pointer; } .ds-btn:hover { background-color: var(--surface-2, #1c2023); } .ds-btn:focus-visible { outline: 2px solid var(--accent, #4ade80); outline-offset: 2px; } .ds-btn:disabled { color: var(--fg-subtle, #858d88); cursor: default; background-color: var(--surface, #16191b); }"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Filled accent button reserved for committing (Save) and the empty state's first Add link.",
+      "html": "<button class=\"ds-btn-primary\">Save</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 34px; padding: 0 12px; border: 1px solid var(--border-strong, #363c41); border-radius: 6px; background-color: var(--surface, #16191b); color: var(--fg, #e3e6e4); font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 13px; white-space: nowrap; cursor: pointer; border-color: var(--accent, #4ade80); background-color: var(--accent, #4ade80); color: var(--accent-fg, #06240f); font-weight: 600; } .ds-btn-primary:hover { filter: brightness(1.08); } .ds-btn-primary:focus-visible { outline: 2px solid var(--accent, #4ade80); outline-offset: 2px; }"
+    },
+    {
+      "name": "Add Link Button",
+      "kind": "button",
+      "refersTo": "button-add",
+      "description": "The toolbar's quiet Add link: an outlined button with the accent only in its text.",
+      "html": "<button class=\"ds-btn-add\">Add link</button>",
+      "css": ".ds-btn-add { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 34px; padding: 0 12px; border: 1px solid var(--border-strong, #363c41); border-radius: 6px; background-color: var(--surface, #16191b); color: var(--fg, #e3e6e4); font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 13px; white-space: nowrap; cursor: pointer; color: var(--accent, #4ade80); font-weight: 600; } .ds-btn-add:hover { background-color: var(--surface-2, #1c2023); } .ds-btn-add:focus-visible { outline: 2px solid var(--accent, #4ade80); outline-offset: 2px; }"
+    },
+    {
+      "name": "Toggle Chips",
+      "kind": "chip",
+      "refersTo": "chip-pressed",
+      "description": "Toggle buttons whose aria-pressed drives style and announcement; Failing only presses in red.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\">Group</button><button class=\"ds-chip ds-chip-danger\" aria-pressed=\"false\">Failing only</button><button class=\"ds-chip ds-chip-danger\" aria-pressed=\"true\">Failing only</button></div>",
+      "css": ".ds-chips { display: flex; gap: 8px; } .ds-chip { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 34px; padding: 0 12px; border: 1px solid var(--border-strong, #363c41); border-radius: 6px; background-color: var(--surface, #16191b); color: var(--fg, #e3e6e4); font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 13px; white-space: nowrap; cursor: pointer; } .ds-chip:hover { background-color: var(--surface-2, #1c2023); } .ds-chip:focus-visible { outline: 2px solid var(--accent, #4ade80); outline-offset: 2px; } .ds-chip[aria-pressed=\"true\"] { border-color: color-mix(in srgb, var(--accent, #4ade80) 55%, transparent); background-color: color-mix(in srgb, var(--accent, #4ade80) 14%, transparent); color: var(--accent, #4ade80); } .ds-chip-danger[aria-pressed=\"true\"] { border-color: color-mix(in srgb, var(--err, #f87171) 55%, transparent); background-color: color-mix(in srgb, var(--err, #f87171) 14%, transparent); color: var(--err, #f87171); }"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "nav",
+      "refersTo": "segmented",
+      "description": "Outlined track of segments for the type filter; the selected segment fills Pressed Graphite.",
+      "html": "<div class=\"ds-segmented\" role=\"group\" aria-label=\"Link type\"><button class=\"ds-seg is-on\" aria-pressed=\"true\">All</button><button class=\"ds-seg\" aria-pressed=\"false\">Internal</button><button class=\"ds-seg\" aria-pressed=\"false\">External</button></div>",
+      "css": ".ds-segmented { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--border-strong, #363c41); border-radius: 6px; background-color: var(--surface, #16191b); } .ds-seg { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border: none; border-radius: 4px; background: none; color: var(--fg-muted, #939b96); font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 13px; cursor: pointer; } .ds-seg:hover { color: var(--fg, #e3e6e4); } .ds-seg:focus-visible { outline: 2px solid var(--accent, #4ade80); outline-offset: 2px; } .ds-seg.is-on { background-color: var(--surface-3, #262b2e); color: var(--fg, #e3e6e4); }"
+    },
+    {
+      "name": "Command Prompt Search",
+      "kind": "input",
+      "refersTo": "search-prompt",
+      "description": "Search as a command line: accent > mark, mono field, accent caret, accent focus halo.",
+      "html": "<span class=\"ds-prompt\"><span class=\"ds-prompt-mark\" aria-hidden=\"true\">&gt;</span><input class=\"ds-prompt-input\" type=\"search\" placeholder=\"filter · enter to open\" aria-label=\"Search links\" /></span>",
+      "css": ".ds-prompt { position: relative; display: flex; width: 320px; max-width: 100%; } .ds-prompt-mark { position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: var(--accent, #4ade80); font-family: 'IBM Plex Mono', ui-monospace, Consolas, monospace; font-size: 13px; pointer-events: none; } .ds-prompt-input { flex: 1 1 auto; min-width: 0; height: 34px; padding: 0 10px 0 26px; border: 1px solid var(--border-input, #636b66); border-radius: 6px; background-color: var(--surface, #16191b); color: var(--fg, #e3e6e4); font-family: 'IBM Plex Mono', ui-monospace, Consolas, monospace; font-size: 13px; caret-color: var(--accent, #4ade80); } .ds-prompt-input::placeholder { color: var(--fg-subtle, #858d88); } .ds-prompt-input:focus { outline: none; border-color: var(--accent, #4ade80); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #4ade80) 22%, transparent); }"
+    },
+    {
+      "name": "Link List with Column Header",
+      "kind": "custom",
+      "refersTo": "link-row",
+      "description": "Terminal-report header line over fixed-column link rows: dot, name + mono URL, 20-bar eighth-quantized sparkline, status with outage time, Resp, Every, hover-revealed ghost actions.",
+      "html": "<div class=\"ds-list\" role=\"list\"><div class=\"ds-head\" aria-hidden=\"true\"><span class=\"ds-dotslot\"></span><span class=\"ds-main\">Name</span><span class=\"ds-spark ds-spark-label\">Last 20</span><span class=\"ds-status\">Status</span><span class=\"ds-lat\">Resp</span><span class=\"ds-int\">Every</span><span class=\"ds-actions ds-ghosted\"><span class=\"ds-act\">Pause</span><span class=\"ds-act\">Edit</span><span class=\"ds-act\">Delete</span></span></div><div class=\"ds-row\" role=\"listitem\"><a class=\"ds-link\" href=\"#\"><span class=\"ds-dot ok\"></span><span class=\"ds-main\"><span class=\"ds-name\">Proxmox</span><span class=\"ds-url\">pve.lan:8006</span></span><span class=\"ds-spark\"><i style=\"height:38%\"></i><i style=\"height:50%\"></i><i style=\"height:38%\"></i><i style=\"height:63%\"></i><i style=\"height:38%\"></i><i style=\"height:50%\"></i><i style=\"height:38%\"></i><i style=\"height:38%\"></i><i style=\"height:50%\"></i><i style=\"height:75%\"></i><i style=\"height:38%\"></i><i style=\"height:50%\"></i><i style=\"height:38%\"></i><i style=\"height:38%\"></i><i style=\"height:50%\"></i><i style=\"height:38%\"></i><i style=\"height:63%\"></i><i style=\"height:38%\"></i><i style=\"height:50%\"></i><i style=\"height:38%\"></i></span><span class=\"ds-status ok\">200<span class=\"ds-phrase\">OK</span></span><span class=\"ds-lat\">38ms</span><span class=\"ds-int\">30s</span></a><span class=\"ds-actions\"><button class=\"ds-act\">Pause</button><button class=\"ds-act\">Edit</button><button class=\"ds-act ds-act-danger\">Delete</button></span></div><div class=\"ds-row\" role=\"listitem\"><a class=\"ds-link\" href=\"#\"><span class=\"ds-dot down\"></span><span class=\"ds-main\"><span class=\"ds-name\">Jellyfin</span><span class=\"ds-url\">media.lan:8096</span></span><span class=\"ds-spark\"><i class=\"is-empty\"></i><i class=\"is-empty\"></i><i class=\"is-empty\"></i><i class=\"is-empty\"></i><i class=\"is-empty\"></i><i class=\"is-empty\"></i><i style=\"height:50%\"></i><i style=\"height:38%\"></i><i style=\"height:50%\"></i><i style=\"height:38%\"></i><i style=\"height:63%\"></i><i style=\"height:50%\"></i><i style=\"height:38%\"></i><i style=\"height:50%\"></i><i class=\"is-fail\" style=\"height:100%\"></i><i class=\"is-fail\" style=\"height:100%\"></i><i class=\"is-fail\" style=\"height:100%\"></i><i class=\"is-fail\" style=\"height:100%\"></i><i class=\"is-fail\" style=\"height:100%\"></i><i class=\"is-fail\" style=\"height:100%\"></i></span><span class=\"ds-status down\">503<span class=\"ds-phrase\">Service Unavailable</span><span class=\"ds-since\">for 12m</span></span><span class=\"ds-lat\">12ms</span><span class=\"ds-int\">30s</span></a><span class=\"ds-actions\"><button class=\"ds-act\">Pause</button><button class=\"ds-act\">Edit</button><button class=\"ds-act ds-act-danger\">Delete</button></span></div></div>",
+      "css": ".ds-list { overflow: hidden; border: 1px solid var(--border, #262a2e); border-radius: 10px; background-color: var(--surface, #16191b); color: var(--fg, #e3e6e4); font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.5; } .ds-head { display: flex; align-items: center; gap: 0 12px; padding: 7px 8px 5px 14px; color: var(--fg-muted, #939b96); font-family: 'IBM Plex Mono', ui-monospace, Consolas, monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; } .ds-head > span:not(.ds-actions) { margin-right: 2px; } .ds-dotslot { width: 8px; flex-shrink: 0; } .ds-row { display: flex; align-items: center; gap: 0 12px; padding: 4px 8px 4px 14px; border-top: 1px solid var(--border, #262a2e); } .ds-row:hover { background-color: var(--surface-2, #1c2023); } .ds-link { display: flex; align-items: center; gap: 14px; flex: 1 1 0; min-width: 0; color: inherit; text-decoration: none; border-radius: 6px; } .ds-link:focus-visible { outline: 2px solid var(--accent, #4ade80); outline-offset: 2px; } .ds-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background-color: var(--fg-subtle, #858d88); } .ds-dot.ok { background-color: var(--ok, #4ade80); } .ds-dot.down { background-color: var(--err, #f87171); } .ds-main { display: flex; align-items: baseline; gap: 10px; flex: 1 1 0; min-width: 0; } .ds-name { font-weight: 500; white-space: nowrap; } .ds-link:hover .ds-name { text-decoration: underline; text-decoration-color: var(--fg-subtle, #858d88); text-underline-offset: 3px; } .ds-url { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'IBM Plex Mono', ui-monospace, Consolas, monospace; font-size: 11.5px; color: var(--fg-muted, #939b96); } .ds-spark { display: flex; flex-shrink: 0; align-items: flex-end; gap: 1px; width: 80px; height: 16px; } .ds-spark-label { align-items: center; height: auto; white-space: nowrap; } .ds-spark i { flex: 1 1 0; min-height: 2px; border-radius: 1px; background-color: var(--accent, #4ade80); opacity: 0.8; } .ds-spark i.is-fail { background-color: var(--err, #f87171); opacity: 1; } .ds-spark i.is-empty { height: 2px; background-color: var(--border-strong, #363c41); opacity: 1; } .ds-status, .ds-lat, .ds-int { flex-shrink: 0; font-family: 'IBM Plex Mono', ui-monospace, Consolas, monospace; font-size: 12px; white-space: nowrap; } .ds-head .ds-status, .ds-head .ds-lat, .ds-head .ds-int { font-size: inherit; color: inherit; } .ds-status { width: 16.5rem; overflow: hidden; text-overflow: ellipsis; color: var(--fg-muted, #939b96); } .ds-status.ok { color: var(--ok, #4ade80); } .ds-status.down { color: var(--err, #f87171); } .ds-phrase, .ds-since { margin-left: 1ch; } .ds-since { color: var(--fg-muted, #939b96); } .ds-lat { width: 4rem; text-align: right; color: var(--fg-muted, #939b96); } .ds-int { width: 3.75rem; text-align: right; color: var(--fg-subtle, #858d88); } .ds-actions { display: flex; flex-shrink: 0; gap: 2px; opacity: 0; transition: opacity 120ms ease-out; } .ds-row:hover .ds-actions, .ds-row:focus-within .ds-actions { opacity: 1; } .ds-ghosted { visibility: hidden; font-family: 'IBM Plex Sans', system-ui, sans-serif; letter-spacing: normal; text-transform: none; } .ds-act { display: inline-flex; align-items: center; height: 26px; padding: 0 8px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--fg-muted, #939b96); font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 12px; cursor: pointer; } .ds-actions .ds-act:first-child { min-width: 64px; justify-content: center; } .ds-act:hover { color: var(--fg, #e3e6e4); background-color: var(--surface-3, #262b2e); } .ds-act:focus-visible { outline: 2px solid var(--accent, #4ade80); outline-offset: 2px; } .ds-act-danger:hover, .ds-act-danger:focus-visible { color: var(--err, #f87171); } @media (prefers-reduced-motion: reduce) { .ds-actions { transition: none; } }"
+    },
+    {
+      "name": "Status Summary",
+      "kind": "custom",
+      "refersTo": "summary",
+      "description": "Mono count line; counts take status color only when non-zero, and the down count is a larger red toggle button.",
+      "html": "<p class=\"ds-summary\"><span class=\"ds-sum ok\"><span class=\"ds-sdot ok\"></span>14 up</span><span class=\"ds-sum\"><span class=\"ds-sdot redirect\"></span>0 redirect</span><button class=\"ds-sum ds-sum-btn down\" aria-pressed=\"false\"><span class=\"ds-sdot down\"></span>2 down</button><span class=\"ds-sum\"><span class=\"ds-sdot paused\"></span>1 paused</span></p>",
+      "css": ".ds-summary { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: baseline; margin: 0; font-family: 'IBM Plex Mono', ui-monospace, Consolas, monospace; font-size: 13px; color: var(--fg-muted, #939b96); } .ds-sum { display: inline-flex; align-items: center; gap: 6px; } .ds-sum.ok { color: var(--ok, #4ade80); } .ds-sum:not(.ok, .down) .ds-sdot { opacity: 0.5; } .ds-sum.down { color: var(--err, #f87171); font-size: 15px; font-weight: 700; } .ds-sum-btn { padding: 0; border: none; border-radius: 2px; background: none; font: inherit; font-weight: 700; color: var(--err, #f87171); cursor: pointer; } .ds-sum-btn:hover, .ds-sum-btn[aria-pressed=\"true\"] { text-decoration: underline; text-underline-offset: 3px; } .ds-sum-btn:focus-visible { outline: 2px solid var(--accent, #4ade80); outline-offset: 2px; } .ds-sdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: var(--fg-subtle, #858d88); } .ds-sdot.ok { background-color: var(--ok, #4ade80); } .ds-sdot.redirect { background-color: var(--warn, #facc15); } .ds-sdot.down { background-color: var(--err, #f87171); } .ds-sdot.paused { background-color: transparent; box-shadow: inset 0 0 0 1.5px var(--fg-subtle, #858d88); }"
+    },
+    {
+      "name": "Function-Key Footer",
+      "kind": "nav",
+      "refersTo": "footer-key",
+      "description": "Hairline-topped footer with a 3270-style function-key legend and the theme control.",
+      "html": "<footer class=\"ds-footer\"><span class=\"ds-footer-start\"><span class=\"ds-mono\">v0.1'ish</span><span class=\"ds-keys\"><kbd>/</kbd> find <kbd>enter</kbd> open <kbd>esc</kbd> clear</span></span><button class=\"ds-btn-sm\">Theme: Dark</button></footer>",
+      "css": ".ds-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-top: 16px; border-top: 1px solid var(--border, #262a2e); font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 12px; color: var(--fg-subtle, #858d88); } .ds-footer-start { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; } .ds-mono { font-family: 'IBM Plex Mono', ui-monospace, Consolas, monospace; } .ds-keys { font-family: 'IBM Plex Mono', ui-monospace, Consolas, monospace; word-spacing: 2px; } .ds-keys kbd { padding: 1px 5px; border: 1px solid var(--border-strong, #363c41); border-radius: 3px; color: var(--fg-muted, #939b96); font-family: inherit; font-size: 11px; } .ds-keys kbd:not(:first-child) { margin-left: 10px; } .ds-btn-sm { display: inline-flex; align-items: center; height: 26px; padding: 0 8px; border: 1px solid var(--border-strong, #363c41); border-radius: 6px; background-color: var(--surface, #16191b); color: var(--fg, #e3e6e4); font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 12px; cursor: pointer; } .ds-btn-sm:hover { background-color: var(--surface-2, #1c2023); } .ds-btn-sm:focus-visible { outline: 2px solid var(--accent, #4ade80); outline-offset: 2px; }"
+    },
+    {
+      "name": "Classic Bracketed Controls",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "Classic theme translation: uppercase [BRACKETED] mono buttons with glow; inverse video marks primary and pressed; rows hover in inverse with failure kept red.",
+      "html": "<div class=\"ds-classic\"><div class=\"ds-c-bar\"><button class=\"ds-c-btn\">Cancel</button><button class=\"ds-c-btn ds-c-primary\">Save</button><button class=\"ds-c-btn\" aria-pressed=\"true\">Group</button><button class=\"ds-c-btn ds-c-danger\" aria-pressed=\"true\">Failing only</button></div><div class=\"ds-c-row\"><span class=\"ds-c-dot\"></span><span>JELLYFIN</span><span class=\"ds-c-down\">503 for 12m</span></div></div>",
+      "css": ".ds-classic { padding: 12px; background: #0c0c0c; color: #33ff33; font-family: 'IBM Plex Mono', ui-monospace, Consolas, monospace; font-size: 13px; text-shadow: 0 0 5px; } .ds-c-bar { display: flex; gap: 6px; margin-bottom: 12px; } .ds-c-btn { padding: 0 2px; border: 1px solid transparent; border-radius: 0; background: none; color: #33ff33; font: inherit; text-transform: uppercase; text-shadow: inherit; cursor: pointer; } .ds-c-btn::before { content: \"[\"; } .ds-c-btn::after { content: \"]\"; } .ds-c-btn:hover { color: #88ff88; text-decoration: underline; } .ds-c-btn:focus-visible { outline: 2px solid #33ff33; outline-offset: 2px; } .ds-c-primary, .ds-c-btn[aria-pressed=\"true\"] { background-color: #33ff33; color: #0c0c0c; text-shadow: none; } .ds-c-primary:hover { background-color: #88ff88; color: #0c0c0c; text-decoration: none; } .ds-c-danger[aria-pressed=\"true\"] { background-color: #ff4444; } .ds-c-row { display: flex; align-items: center; gap: 12px; padding: 4px 8px; border-top: 1px dashed #143a14; } .ds-c-dot { width: 8px; height: 8px; background: #ff4444; } .ds-c-down { color: #ff4444; } .ds-c-row:hover { background: #33ff33; } .ds-c-row:hover * { color: #0c0c0c; text-shadow: none; } .ds-c-row:hover .ds-c-down { background: #ff4444; } .ds-c-row:hover .ds-c-dot { background: #ff4444; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Machine Room",
+    "overview": "The system remembers one place: the cold, air-conditioned IBM System/370 room, calm and humming and precise, where a green screen glowed in the corner. The green is carried as a memory rather than a costume. In the default Dark theme it survives as a single phosphor accent, a blinking underscore after the title, a `>` prompt mark, and monospace for everything the machine reports. The full green-phosphor CRT is still on the premises, but behind a door: the opt-in Classic theme, with its glow, scanlines, vignette and brightness dial.\n\nThe voice is crisp, technical, warm. Crisp in its hairline rules, fixed columns and 14px base; technical in its terminal-report column header, function-key legend and HTTP phrases spelled out (\"503 Service Unavailable for 12m\"); warm in its small kindnesses: actions that wait until you reach for them, a down count you can click, an empty state that reads \"> all systems nominal\". Density is that of an operator's console: one link per line, every value in its column, nothing decorative between them.\n\nHierarchy is set by what is broken. Healthy links recede into calm gray and green; a failure is the one thing permitted to raise its voice, in red and in weight. Everything else, including adding a link, stays quiet.",
+    "keyCharacteristics": [
+      "Three themes on one token set: Dark (default), Light, and Classic green phosphor.",
+      "Flat tonal surfaces in four steps; the dialog is the only lifted object.",
+      "IBM Plex Sans for what people wrote and act on, IBM Plex Mono for what the machine reports.",
+      "Green, amber and red mean up, redirect and down, and nothing else.",
+      "Fixed-width columns under a terminal-report header line; actions revealed on intent.",
+      "Every text token clears 4.5:1 in every theme."
+    ],
+    "rules": [
+      {
+        "name": "The Spoken-For Rule",
+        "body": "Green, amber and red mean up, redirect and down. Nothing else may borrow them: latency stays out of the status colors (slow reads brighter in Cold White, a failed check's time steps back to Idle Gray), and Delete stays neutral until hovered.",
+        "section": "colors"
+      },
+      {
+        "name": "The Loudest Thing Is What's Broken Rule",
+        "body": "Only failure raises its voice. The down count alone grows (15px, weight 700) and turns red; Add link is a quiet outlined button with green text, not a filled one.",
+        "section": "colors"
+      },
+      {
+        "name": "The 4.5 Floor Rule",
+        "body": "Every text token clears 4.5:1 on `--bg`, `--surface` and `--surface-2` in all three themes, and field edges clear 3:1. Dim with a quieter token, never with opacity (a paused name turns Instrument Gray); Classic's brightness dial stops at 0.85 because red \"down\" text fails below it.",
+        "section": "colors"
+      },
+      {
+        "name": "The Printout Rule",
+        "body": "What the machine reports is set in Plex Mono: URLs, status codes, latency, intervals, counts, key caps, the prompt. What a person named or acts on is set in Plex Sans: link names, buttons, field labels.",
+        "section": "typography"
+      },
+      {
+        "name": "The Report Heading Rule",
+        "body": "Uppercase belongs to the 11px mono label tier only, as on a terminal report. Sans text is never set uppercase outside Classic.",
+        "section": "typography"
+      },
+      {
+        "name": "The Fixed Columns Rule",
+        "body": "Every row value has a fixed-width slot, and state changes never shift a column: actions hide by opacity, not display, and Pause/Resume share a minimum width.",
+        "section": "layout"
+      },
+      {
+        "name": "The Reveal on Intent Rule",
+        "body": "Row actions appear only when the row is hovered, focused within, or confirming a delete (opacity, 120ms ease-out). Touch screens keep them visible; under 760px they fold behind the More toggle.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat Machine Rule",
+        "body": "Rows, lists, buttons and chips never cast shadows. A modal dialog is the only object allowed to lift off the page.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Pressed State Is the Attribute Rule",
+        "body": "Toggle state lives in `aria-pressed` (or `aria-expanded`, or a checked radio), and the styling reads from it, so what sighted users see and what screen readers announce cannot drift apart.",
+        "section": "components"
+      },
+      {
+        "name": "The Inverse Video Rule",
+        "body": "In Classic, inverse video marks the primary action, a pressed toggle and the hovered row, and status hue survives the inversion.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do set machine-reported values (URLs, status, latency, intervals, counts, keys) in IBM Plex Mono at 11 to 13px, and names, buttons and labels in IBM Plex Sans.",
+      "Do keep green, amber and red for up, redirect and down, and render latency in Cold White (slow), Instrument Gray (normal) or Idle Gray (failed).",
+      "Do clear 4.5:1 for any new text in all three themes on `--bg`, `--surface` and `--surface-2`, and dim with a quieter token instead of opacity.",
+      "Do give every new column a fixed width and hide row-level controls with opacity so columns never shift.",
+      "Do reveal row actions on hover and focus-within (120ms ease-out), keep them visible on touch, and fold them behind the More toggle under 760px.",
+      "Do drive toggle styling from `aria-pressed`, `aria-expanded` or checked state.",
+      "Do grow targets under `pointer: coarse` (40px controls, 36px small buttons, 44px More).",
+      "Do stop the cursor blink, ping pulse and dialog rise under `prefers-reduced-motion`.",
+      "Do give every new element its Classic translation: 0 radius, uppercase bracketed buttons, inverse video for pressed and primary, dashed rules."
+    ],
+    "donts": [
+      "Don't color latency, Delete at rest, or any non-status value red or amber.",
+      "Don't fill a routine action with the accent; the filled Phosphor Green button is for Save and the empty state's first Add link.",
+      "Don't add shadows to rows, lists, chips or buttons; only modal dialogs lift.",
+      "Don't bring glow, scanlines, vignette or the brightness filter into Dark or Light; CRT effects live only in Classic.",
+      "Don't let Classic's inverse hover erase failure: down status, red dots and failure bars stay red.",
+      "Don't tint the top match in Classic; mark it with the dashed outline, since a green fill would pull its red and dim-green text below readable contrast.",
+      "Don't replace action words with icons; the three-dot More toggle (inline SVG) is the only icon in the system."
+    ]
+  }
+}

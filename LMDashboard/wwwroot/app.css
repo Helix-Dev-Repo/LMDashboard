@@ -188,8 +188,14 @@ body {
     letter-spacing: -0.01em;
 }
 
+/* Focus lands here when the last row is deleted; keyboard users still see where they are */
 .lm-title:focus {
     outline: none;
+}
+
+.lm-title:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
 }
 
 .lm-cursor {
@@ -208,9 +214,10 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 4px 16px;
+    align-items: baseline;
     margin: 0;
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 13px;
     color: var(--fg-muted);
 }
 
@@ -230,6 +237,7 @@ body {
 /* Anything down is the one count that should catch the eye */
 .lm-sum.down {
     color: var(--err);
+    font-size: 15px;
     font-weight: 700;
 }
 
@@ -252,6 +260,14 @@ body {
 .lm-sum-btn:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
+}
+
+/* A bigger tap area for fingers without moving the text */
+@media (pointer: coarse) {
+    .lm-sum-btn {
+        margin: -13px -8px;
+        padding: 13px 8px;
+    }
 }
 
 /* ── Status dot ── */
@@ -375,6 +391,21 @@ body {
     border-color: color-mix(in srgb, var(--err) 55%, transparent);
     background-color: color-mix(in srgb, var(--err) 14%, transparent);
     color: var(--err);
+}
+
+/* On Light's pale tints the accent and red text fall under 4.5:1; deeper shades restore it */
+.theme-light .lm-chip[aria-pressed="true"] {
+    color: #0f6a30;
+}
+
+.theme-light .lm-chip-danger[aria-pressed="true"] {
+    color: #a51818;
+}
+
+/* The toolbar's Add link: a quiet button with the accent in its text */
+.lm-btn-add {
+    color: var(--accent);
+    font-weight: 600;
 }
 
 .lm-segmented {
@@ -630,6 +661,15 @@ html:has(.lm-dialog[open]) {
     margin-top: 16px;
 }
 
+.lm-input[aria-invalid="true"] {
+    border-color: var(--err);
+}
+
+.lm-input[aria-invalid="true"]:focus {
+    border-color: var(--err);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--err) 22%, transparent);
+}
+
 .lm-form-error {
     margin-right: auto;
     color: var(--err);
@@ -726,15 +766,20 @@ html:has(.lm-dialog[open]) {
     text-transform: none;
 }
 
-/* The row Enter in the prompt would open */
+/* The row Enter in the prompt would open. The tint stays light enough that the dimmest text
+   in the row still clears 4.5:1; the ring does most of the marking. */
 .lm-row.is-top-match {
-    background-color: color-mix(in srgb, var(--accent) 8%, var(--surface));
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
+    background-color: color-mix(in srgb, var(--accent) 5%, var(--surface));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
+/* Classic marks it with a dashed outline, like a selection on a terminal; a green fill would
+   pull its red and dim-green text below readable contrast. */
 .theme-classic .lm-row.is-top-match {
-    background-color: var(--surface-3);
+    background-color: transparent;
     box-shadow: none;
+    outline: 1px dashed var(--fg);
+    outline-offset: -3px;
 }
 
 /* Touch screens would leave the tint stuck on the last row tapped */
@@ -979,6 +1024,38 @@ html:has(.lm-dialog[open]) {
     color: var(--fg-subtle);
 }
 
+.lm-footer-start {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 24px;
+}
+
+/* Function-key legend. Only for keyboards, so touch screens leave it out. */
+.lm-keys {
+    font-family: var(--font-mono);
+    word-spacing: 2px;
+}
+
+.lm-keys kbd {
+    padding: 1px 5px;
+    border: 1px solid var(--border-strong);
+    border-radius: 3px;
+    color: var(--fg-muted);
+    font-family: inherit;
+    font-size: 11px;
+}
+
+.lm-keys kbd:not(:first-child) {
+    margin-left: 10px;
+}
+
+@media (hover: none) {
+    .lm-keys {
+        display: none;
+    }
+}
+
 .lm-footer-controls {
     display: flex;
     flex-wrap: wrap;
@@ -1115,10 +1192,11 @@ html:has(.lm-dialog[open]) {
 
 .theme-classic .lm-input:focus {
     border-color: var(--fg);
+    box-shadow: none;
 }
 
-.theme-classic .lm-input:focus {
-    box-shadow: none;
+.theme-classic .lm-input[aria-invalid="true"] {
+    border-color: var(--err);
 }
 
 .theme-classic .lm-list,
@@ -1298,7 +1376,7 @@ html:has(.lm-dialog[open]) {
         border-top: none;
     }
 
-    .lm-toolbar > .lm-btn-primary {
+    .lm-toolbar > .lm-btn-add {
         order: -1;
     }
 

@@ -19,7 +19,8 @@ The project started when I came across CERN's simulation of the first line-mode 
 ## Features
 
 - Internal and external links, grouped by type or filtered, with search by name or URL
-- A command-prompt search: `/` to jump to it, Enter to open the first match, Esc to clear
+- Failing links sort to the top of each list
+- A command-prompt search: `/` to jump to it, Enter to open the first match, Esc to clear, with the keys listed in the footer
 - The down count in the page header and the browser tab's title, and how long each failing link has been down
 - A two-line layout on phones, with each link's actions behind a menu button
 - A check interval for each link, down to 1 second. New internal links start at 30 seconds and external links at 5 minutes.

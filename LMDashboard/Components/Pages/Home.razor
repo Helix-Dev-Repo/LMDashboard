@@ -74,7 +74,9 @@
             <button class="lm-btn lm-chip lm-chip-danger" aria-pressed="@Pressed(_showFailingOnly)" @onclick="ToggleFailing">Failing only</button>
 
             <span class="lm-toolbar-spacer"></span>
-            <button class="lm-btn lm-btn-primary" @onclick="AddNew">Add link</button>
+            @* A plain button: adding a link is occasional, and the page's loudest element should be
+               what's broken, not this. *@
+            <button class="lm-btn lm-btn-add" @onclick="AddNew">Add link</button>
         </div>
 
         @if (_storeError is not null)
@@ -98,15 +100,17 @@
                 {
                     <p class="lm-empty-prompt">&gt; all systems nominal</p>
                     <p>Nothing is failing right now.</p>
+                    @* Failing only is remembered, so this can be the first thing a new day shows. *@
+                    <button class="lm-btn" @onclick="ToggleFailing">Show all links</button>
                 }
                 else if (!string.IsNullOrWhiteSpace(_searchTerm))
                 {
-                    <p>No links match <span class="lm-empty-term">@_searchTerm</span>.</p>
+                    <p class="lm-empty-prompt">&gt; no match for <span class="lm-empty-term">@_searchTerm</span></p>
                     <button class="lm-btn" @onclick="ClearSearch">Clear search</button>
                 }
                 else
                 {
-                    <p>No links match the current filters.</p>
+                    <p class="lm-empty-prompt">&gt; no links match these filters</p>
                 }
             </div>
         }
@@ -135,7 +139,14 @@
         </main>
 
         <footer class="lm-footer">
-            <span class="lm-mono">v0.1'ish</span>
+            <span class="lm-footer-start">
+                <span class="lm-mono">v0.1'ish</span>
+                @* A function-key legend, after the PF-key strip on 3270 screens. Screen readers get
+                   the same keys from the search box's description. *@
+                <span class="lm-keys" aria-hidden="true">
+                    <kbd>/</kbd> find <kbd>enter</kbd> open <kbd>esc</kbd> clear
+                </span>
+            </span>
             <div class="lm-footer-controls">
                 @if (_theme == Theme.Classic)
                 {
@@ -340,7 +351,12 @@
 
     private void RefreshLinks()
     {
-        _links = Store.Links.OrderBy(l => l.Name, StringComparer.OrdinalIgnoreCase).ToList();
+        // Failing links rise to the top, like an alert line on a console; the rest stay in the
+        // alphabetical order you know by heart.
+        _links = Store.Links
+            .OrderBy(l => !IsFailing(l))
+            .ThenBy(l => l.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
         AnnounceTransitions();
         ApplyFilter();
     }

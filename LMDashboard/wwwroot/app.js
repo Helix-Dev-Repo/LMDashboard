@@ -70,9 +70,13 @@ function openTopMatch(el) {
     if (!term.trim() || !main) return;
     if (searchPending) commitSearch(el);
 
+    // The prompt empties once the link opens, so coming back to the tab shows every link again.
     const open = () => {
         const link = document.querySelector(".lm-row-link");
-        if (link) window.open(link.href, "_blank", "noopener,noreferrer");
+        if (!link) return;
+        window.open(link.href, "_blank", "noopener,noreferrer");
+        el.value = "";
+        commitSearch(el);
     };
 
     if (main.dataset.searchTerm === term) {

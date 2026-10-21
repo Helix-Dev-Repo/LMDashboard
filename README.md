@@ -23,8 +23,8 @@ I don't really expect anyone other than me to use this. It's a way to hold on to
 - Keeps your links on one page, each marked as internal or external. Clicking a link opens it in a new tab.
 - Checks each link on its own interval and shows the HTTP status, the response time, and a graph of the last 20 checks, with failed checks in red. A link that's down also shows how long it's been down.
 - Shows at the top how many links are up, redirecting, down, waiting for a first check, or paused. Clicking the down count shows just the failing links, and the browser tab's title carries the count too, so a tab in the background reads "(2 down) LM Dashboard".
-- Filters by type, groups internal and external links, and shows only failing links. A header line above the list labels the columns, like the heading on a terminal report.
-- Search works like a command prompt. Press `/` to jump to it from anywhere, type part of a name or URL, and press Enter to open the first match. Esc clears it.
+- Filters by type, groups internal and external links, and shows only failing links. Failing links sort to the top of each list, and a header line above it labels the columns, like the heading on a terminal report.
+- Search works like a command prompt. Press `/` to jump to it from anywhere, type part of a name or URL, and press Enter to open the first match. Esc clears it. The keys are listed at the bottom of the page.
 - Comes with dark, light, and Classic themes. Classic is the green-phosphor look the project started with, with optional scanlines and vignette and a brightness slider.
 - Works on a phone. Each link takes two lines there, and its Pause, Edit, and Delete buttons fold behind a menu button.
 
