@@ -26,7 +26,7 @@
     margin: 20vh auto;
     padding: 1.5rem 2rem;
     border: 1px solid var(--border-strong);
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
     opacity: 0;
     transition: display 0.5s allow-discrete, overlay 0.5s allow-discrete;
@@ -80,7 +80,7 @@
     height: 32px;
     padding: 0 16px;
     border: 1px solid var(--accent);
-    border-radius: 6px;
+    border-radius: var(--radius);
     background-color: var(--accent);
     color: var(--accent-fg);
     font-family: inherit;
@@ -108,7 +108,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .lm-modal-cursor::after {
+    .lm-modal-cursor::after,
+    #components-reconnect-modal::backdrop {
         animation: none;
+    }
+
+    /* Without the fade the modal would stay at its starting opacity of 0 */
+    #components-reconnect-modal[open] {
+        animation: none;
+        opacity: 1;
     }
 }

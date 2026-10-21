@@ -55,7 +55,15 @@ public class PingService(LinkStore store, IHttpClientFactory httpClientFactory, 
         {
             sw.Stop();
             logger.LogWarning(ex, "Failed to ping {Url}", url);
-            store.UpdateStatus(id, pingId, null, "Unreachable", sw.ElapsedMilliseconds);
+
+            // Name the failure where it's known, so a bad certificate doesn't look like a dead host.
+            var description = ex.HttpRequestError switch
+            {
+                HttpRequestError.NameResolutionError => "DNS failed",
+                HttpRequestError.SecureConnectionError => "TLS error",
+                _ => "Unreachable"
+            };
+            store.UpdateStatus(id, pingId, null, description, sw.ElapsedMilliseconds);
         }
         catch (Exception ex) when (!ct.IsCancellationRequested)
         {

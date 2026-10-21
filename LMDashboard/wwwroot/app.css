@@ -46,7 +46,11 @@
 }
 
 /* ── Theme tokens ──
-   Dark is the default and also styles the standalone Error / Not Found pages. */
+   Dark is the default and also styles the standalone Error / Not Found pages.
+   Light and Classic also apply at :root so the page background, reconnect modal and error
+   bar, which render outside .lm-dashboard, follow the active theme.
+   Every text token clears 4.5:1 on --bg, --surface and the --surface-2 row hover;
+   --border-input clears 3:1 so field edges stay visible. */
 :root,
 .lm-dashboard.theme-dark {
     --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -61,9 +65,10 @@
     --surface-3: #262b2e;
     --border: #262a2e;
     --border-strong: #363c41;
+    --border-input: #636b66;
     --fg: #e3e6e4;
     --fg-muted: #939b96;
-    --fg-subtle: #5f6762;
+    --fg-subtle: #858d88;
     --accent: #4ade80;
     --accent-fg: #06240f;
     --ok: #4ade80;
@@ -73,6 +78,7 @@
     color-scheme: dark;
 }
 
+:root:has(.lm-dashboard.theme-light),
 .lm-dashboard.theme-light {
     --bg: #f5f6f5;
     --surface: #ffffff;
@@ -80,19 +86,21 @@
     --surface-3: #e3e7e5;
     --border: #e1e4e2;
     --border-strong: #c9cfcb;
+    --border-input: #868f8a;
     --fg: #1b1f1d;
     --fg-muted: #58615c;
-    --fg-subtle: #8a938e;
+    --fg-subtle: #646c66;
     --accent: #15803d;
     --accent-fg: #ffffff;
-    --ok: #16a34a;
-    --warn: #b45309;
-    --err: #dc2626;
+    --ok: #137a3a;
+    --warn: #a34a06;
+    --err: #c81e1e;
 
     color-scheme: light;
 }
 
 /* Green-phosphor CRT: the original look, kept as an opt-in theme */
+:root:has(.lm-dashboard.theme-classic),
 .lm-dashboard.theme-classic {
     --font-sans: var(--font-mono);
     --radius: 0;
@@ -104,9 +112,10 @@
     --surface-3: #143a14;
     --border: #143a14;
     --border-strong: #1a6a1a;
+    --border-input: #2ea82e;
     --fg: #33ff33;
     --fg-muted: #22bb22;
-    --fg-subtle: #1a6a1a;
+    --fg-subtle: #2ea82e;
     --accent: #33ff33;
     --accent-fg: #0c0c0c;
     --ok: #33ff33;
@@ -125,17 +134,6 @@ body {
     font-family: var(--font-sans);
     font-size: 14px;
     line-height: 1.5;
-}
-
-/* Overscroll and short pages show the active theme's background, not the default */
-html:has(.theme-light),
-html:has(.theme-light) body {
-    background-color: #f5f6f5;
-}
-
-html:has(.theme-classic),
-html:has(.theme-classic) body {
-    background-color: #0c0c0c;
 }
 
 .sr-only {
@@ -228,7 +226,12 @@ html:has(.theme-classic) body {
 
 .lm-sum.ok { color: var(--ok); }
 .lm-sum.redirect { color: var(--warn); }
-.lm-sum.down { color: var(--err); }
+
+/* Anything down is the one count that should catch the eye */
+.lm-sum.down {
+    color: var(--err);
+    font-weight: 700;
+}
 
 /* ── Status dot ── */
 .lm-dot {
@@ -388,7 +391,7 @@ html:has(.theme-classic) body {
 .lm-input {
     height: var(--control-h);
     padding: 0 10px;
-    border: 1px solid var(--border-strong);
+    border: 1px solid var(--border-input);
     border-radius: var(--radius);
     background-color: var(--surface);
     color: var(--fg);
@@ -536,6 +539,11 @@ html:has(.lm-dialog[open]) {
     accent-color: var(--accent);
 }
 
+.lm-check input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
 /* In the dialog every control fills its grid column, so the second row's edges line up
    with Name and URL above it. */
 .lm-form-grid .lm-segmented {
@@ -557,7 +565,7 @@ html:has(.lm-dialog[open]) {
 .lm-form-grid .lm-check {
     display: flex;
     padding: 0 10px;
-    border: 1px solid var(--border-strong);
+    border: 1px solid var(--border-input);
     border-radius: var(--radius);
     background-color: var(--surface);
 }
@@ -669,7 +677,7 @@ html:has(.lm-dialog[open]) {
     border: 1px solid var(--border-strong);
     border-radius: 4px;
     font-family: var(--font-mono);
-    font-size: 10.5px;
+    font-size: 11px;
     letter-spacing: 0.04em;
     color: var(--fg-muted);
 }
@@ -724,14 +732,20 @@ html:has(.lm-dialog[open]) {
 .lm-row-status.redirect { color: var(--warn); }
 .lm-row-status.down { color: var(--err); }
 
+.lm-row-status .lm-status-phrase {
+    margin-left: 1ch;
+}
+
+/* Latency stays out of the status colors: red and amber belong to down and redirect.
+   Slow reads brighter, and a failed check's time-to-fail steps back. */
 .lm-row-latency {
     width: 4rem;
     text-align: right;
     color: var(--fg-muted);
 }
 
-.lm-row-latency.is-medium { color: var(--warn); }
-.lm-row-latency.is-slow { color: var(--err); }
+.lm-row-latency.is-slow { color: var(--fg); }
+.lm-row-latency.is-fail { color: var(--fg-subtle); }
 
 .lm-row-interval {
     width: 3.5rem;
@@ -739,7 +753,11 @@ html:has(.lm-dialog[open]) {
     color: var(--fg-subtle);
 }
 
-.lm-row.is-paused .lm-row-name,
+/* A color rather than opacity, so the dimmed name still clears contrast */
+.lm-row.is-paused .lm-row-name {
+    color: var(--fg-muted);
+}
+
 .lm-row.is-paused .lm-spark {
     opacity: 0.6;
 }
@@ -748,6 +766,21 @@ html:has(.lm-dialog[open]) {
     display: flex;
     flex-shrink: 0;
     gap: 2px;
+}
+
+/* Actions wait until the row is pointed at or focused. Touch screens can't hover, so they
+   keep them. Opacity rather than display, so the columns don't shift. */
+@media (hover: hover) {
+    .lm-row-actions {
+        opacity: 0;
+        transition: opacity 120ms ease-out;
+    }
+
+    .lm-row:hover .lm-row-actions,
+    .lm-row:focus-within .lm-row-actions,
+    .lm-row.is-confirming .lm-row-actions {
+        opacity: 1;
+    }
 }
 
 /* Pause and Resume differ in width; a fixed width keeps paused rows' columns in line */
@@ -786,6 +819,11 @@ html:has(.lm-dialog[open]) {
 .lm-empty-prompt {
     font-family: var(--font-mono);
     color: var(--accent);
+}
+
+.lm-empty-term {
+    color: var(--fg);
+    font-family: var(--font-mono);
 }
 
 /* ── Footer ── */
@@ -832,7 +870,18 @@ html:has(.lm-dialog[open]) {
 .lm-dashboard.theme-classic {
     /* Inherited, and with no color each element glows in its own color */
     text-shadow: 0 0 5px;
+}
+
+/* On the shell rather than the dashboard: a filter would trap the fixed CRT overlays below */
+.theme-classic .lm-shell {
     filter: brightness(var(--lm-brightness, 1));
+}
+
+/* Small mono text blurs under the full glow */
+.theme-classic .lm-row-url,
+.theme-classic .lm-badge,
+.theme-classic .lm-row-interval {
+    text-shadow: 0 0 2px;
 }
 
 .theme-classic .lm-title {
@@ -864,8 +913,10 @@ html:has(.lm-dialog[open]) {
     font-weight: 400;
 }
 
-.theme-classic .lm-btn::before { content: "["; }
-.theme-classic .lm-btn::after { content: "]"; }
+.theme-classic .lm-btn::before,
+.theme-classic .lm-seg::before { content: "["; }
+.theme-classic .lm-btn::after,
+.theme-classic .lm-seg::after { content: "]"; }
 
 .theme-classic .lm-btn:hover,
 .theme-classic .lm-seg:hover {
@@ -880,9 +931,24 @@ html:has(.lm-dialog[open]) {
     text-decoration: none;
 }
 
-.theme-classic .lm-btn-danger,
+/* Delete stays green like its neighbours until hovered, as in the other themes */
+.theme-classic .lm-btn-danger:hover,
+.theme-classic .lm-btn-danger:focus-visible,
 .theme-classic .lm-btn-danger-solid {
     color: var(--err);
+}
+
+/* Inverse video marks the primary action, as it does pressed toggles */
+.theme-classic .lm-btn-primary {
+    background-color: var(--fg);
+    color: var(--bg);
+    text-shadow: none;
+}
+
+.theme-classic .lm-btn-primary:hover {
+    background-color: #88ff88;
+    color: var(--bg);
+    text-decoration: none;
 }
 
 .theme-classic .lm-segmented {
@@ -906,6 +972,10 @@ html:has(.lm-dialog[open]) {
 .theme-classic .lm-form-grid .lm-check {
     border-width: 0 0 1px;
     background: transparent;
+}
+
+.theme-classic .lm-input:focus {
+    border-color: var(--fg);
 }
 
 .theme-classic .lm-input:focus {
@@ -950,9 +1020,10 @@ html:has(.lm-dialog[open]) {
     border-radius: 0;
 }
 
+/* Fixed to the viewport, like the glass of a screen, rather than stretched over the page */
 .lm-dashboard.theme-classic.crt-scanlines::before {
     content: "";
-    position: absolute;
+    position: fixed;
     inset: 0;
     z-index: 100;
     background: repeating-linear-gradient(
@@ -967,7 +1038,7 @@ html:has(.lm-dialog[open]) {
 
 .lm-dashboard.theme-classic.crt-vignette::after {
     content: "";
-    position: absolute;
+    position: fixed;
     inset: 0;
     z-index: 100;
     background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.5) 100%);
@@ -1006,6 +1077,33 @@ html:has(.lm-dialog[open]) {
     .lm-dialog[open] {
         animation: none;
     }
+
+    .lm-row-actions {
+        transition: none;
+    }
+}
+
+/* ── Touch ──
+   Fingers need bigger targets than the 26px row buttons and 28px segments */
+@media (pointer: coarse) {
+    :root,
+    .lm-dashboard.theme-dark {
+        --control-h: 40px;
+    }
+
+    .lm-btn-sm {
+        height: 36px;
+        padding: 0 12px;
+    }
+
+    .lm-row-actions {
+        gap: 8px;
+    }
+
+    .theme-classic .lm-btn,
+    .theme-classic .lm-seg {
+        min-height: 36px;
+    }
 }
 
 /* ── Narrow screens ── */
@@ -1042,17 +1140,31 @@ html:has(.lm-dialog[open]) {
         gap: 0;
     }
 
+    /* The name is what you came for; it gets a second line before it gives up letters */
     .lm-row-name {
+        display: -webkit-box;
         max-width: none;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
     }
 
+    /* The code alone carries the status here; the name gets the room. A fixed width keeps
+       the badges in line from row to row. */
     .lm-row-status {
-        width: auto;
-        max-width: 9rem;
+        width: 6rem;
     }
 
+    .lm-row-status .lm-status-phrase {
+        display: none;
+    }
+
+    /* They get a line of their own here, so hiding them would only leave a gap */
     .lm-row-actions {
         width: 100%;
         justify-content: flex-end;
+        opacity: 1;
     }
 }

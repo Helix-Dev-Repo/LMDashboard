@@ -7,25 +7,28 @@
 <PageTitle>LM Dashboard</PageTitle>
 
 <div class="@DashboardClasses" style="--lm-brightness: @_brightness.ToString(CultureInfo.InvariantCulture)">
-    <div class="lm-shell">
+    <main class="lm-shell">
         <header class="lm-header">
             <h1 class="lm-title" tabindex="-1">LM Dashboard<span class="lm-cursor" aria-hidden="true">_</span></h1>
-            @{
+            @* Three zero counts say nothing before the first link exists. *@
+            @if (_links.Count > 0)
+            {
                 var summary = GetStatusSummary();
+                <p class="lm-summary">
+                    <span class="lm-sum @(summary.Up > 0 ? "ok" : "")"><span class="lm-dot ok" aria-hidden="true"></span>@summary.Up up</span>
+                    <span class="lm-sum @(summary.Redirect > 0 ? "redirect" : "")"><span class="lm-dot redirect" aria-hidden="true"></span>@summary.Redirect redirect</span>
+                    <span class="lm-sum @(summary.Down > 0 ? "down" : "")"><span class="lm-dot down" aria-hidden="true"></span>@summary.Down down</span>
+                    @if (summary.Pending > 0)
+                    {
+                        <span class="lm-sum"><span class="lm-dot pending" aria-hidden="true"></span>@summary.Pending pending</span>
+                    }
+                    @if (summary.Paused > 0)
+                    {
+                        <span class="lm-sum"><span class="lm-dot paused" aria-hidden="true"></span>@summary.Paused paused</span>
+                    }
+                </p>
             }
-            <p class="lm-summary">
-                <span class="lm-sum @(summary.Up > 0 ? "ok" : "")"><span class="lm-dot ok" aria-hidden="true"></span>@summary.Up up</span>
-                <span class="lm-sum @(summary.Redirect > 0 ? "redirect" : "")"><span class="lm-dot redirect" aria-hidden="true"></span>@summary.Redirect redirect</span>
-                <span class="lm-sum @(summary.Down > 0 ? "down" : "")"><span class="lm-dot down" aria-hidden="true"></span>@summary.Down down</span>
-                @if (summary.Pending > 0)
-                {
-                    <span class="lm-sum"><span class="lm-dot pending" aria-hidden="true"></span>@summary.Pending pending</span>
-                }
-                @if (summary.Paused > 0)
-                {
-                    <span class="lm-sum"><span class="lm-dot paused" aria-hidden="true"></span>@summary.Paused paused</span>
-                }
-            </p>
+            <p class="sr-only" role="status">@_announcement</p>
         </header>
 
         <div class="lm-toolbar">
@@ -70,6 +73,11 @@
                     <p class="lm-empty-prompt">&gt; all systems nominal</p>
                     <p>Nothing is failing right now.</p>
                 }
+                else if (!string.IsNullOrWhiteSpace(_searchTerm))
+                {
+                    <p>No links match <span class="lm-empty-term">@_searchTerm</span>.</p>
+                    <button class="lm-btn" @onclick="ClearSearch">Clear search</button>
+                }
                 else
                 {
                     <p>No links match the current filters.</p>
@@ -107,7 +115,8 @@
                         @* app.js previews the drag locally; the server only sees the released value. *@
                         <input type="range" class="lm-brightness-slider" min="@MinBrightness.ToString(CultureInfo.InvariantCulture)"
                                max="@MaxBrightness.ToString(CultureInfo.InvariantCulture)" step="0.05"
-                               value="@_brightness.ToString(CultureInfo.InvariantCulture)" @onchange="OnBrightnessCommitted" />
+                               value="@_brightness.ToString(CultureInfo.InvariantCulture)"
+                               aria-valuetext="@_brightness.ToString("0.00", CultureInfo.InvariantCulture)" @onchange="OnBrightnessCommitted" />
                         <span class="lm-brightness-value">@_brightness.ToString("0.00", CultureInfo.InvariantCulture)</span>
                     </label>
                     <button class="lm-btn lm-chip lm-btn-sm" aria-pressed="@Pressed(_scanlines)" @onclick="ToggleScanlines">Scanlines</button>
@@ -118,7 +127,7 @@
         </footer>
 
         <LinkDialog Editing="_editing" IsNew="_isNew" Error="@_formError" OnSave="SaveLink" OnCancel="CancelEdit" />
-    </div>
+    </main>
 </div>
 
 @code {
@@ -147,6 +156,11 @@
     private int _refreshQueued;
     private readonly CancellationTokenSource _disposed = new();
 
+    // Whether each link was failing at the last refresh, so going down or coming back can be
+    // announced to screen readers. Links seen for the first time are recorded silently.
+    private readonly Dictionary<Guid, bool> _wasFailing = [];
+    private string _announcement = string.Empty;
+
     private enum LinkFilter { All, Internal, External }
 
     private enum Theme { Dark, Light, Classic }
@@ -164,7 +178,7 @@
 
     private RenderFragment RenderList(List<SiteLink> links, bool showType) => __builder =>
     {
-        <div class="lm-list">
+        <div class="lm-list" role="list">
             @foreach (var link in links)
             {
                 var id = link.Id;
@@ -234,7 +248,36 @@
     private void RefreshLinks()
     {
         _links = Store.Links.OrderBy(l => l.Name, StringComparer.OrdinalIgnoreCase).ToList();
+        AnnounceTransitions();
         ApplyFilter();
+    }
+
+    private static bool IsFailing(SiteLink l) =>
+        l.LastChecked is not null && l.LastStatusCode is not (>= 200 and < 400);
+
+    private void AnnounceTransitions()
+    {
+        var changes = new List<string>();
+        foreach (var link in _links)
+        {
+            var failing = IsFailing(link);
+
+            // Pausing clears a link's status; that isn't the link recovering.
+            if (_wasFailing.TryGetValue(link.Id, out var was) && was != failing && link.PingEnabled)
+                changes.Add(failing ? $"{link.Name} is down" : $"{link.Name} is back up");
+
+            _wasFailing[link.Id] = failing;
+        }
+
+        if (_wasFailing.Count > _links.Count)
+        {
+            var current = _links.Select(l => l.Id).ToHashSet();
+            foreach (var id in _wasFailing.Keys.Where(id => !current.Contains(id)).ToList())
+                _wasFailing.Remove(id);
+        }
+
+        if (changes.Count > 0)
+            _announcement = string.Join(". ", changes) + ".";
     }
 
     private void ApplyFilter()
@@ -249,7 +292,7 @@
         // Failing means a completed check outside 2xx/3xx; redirects count separately
         // in the summary, so they are not treated as failures here either.
         if (_showFailingOnly)
-            result = result.Where(l => l.LastChecked is not null && l.LastStatusCode is not (>= 200 and < 400));
+            result = result.Where(IsFailing);
 
         if (!string.IsNullOrWhiteSpace(_searchTerm))
             result = result.Where(l => l.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)
@@ -263,6 +306,12 @@
         _filter = filter;
         ApplyFilter();
         PersistPreferences();
+    }
+
+    private void ClearSearch()
+    {
+        _searchTerm = string.Empty;
+        ApplyFilter();
     }
 
     private void ToggleGrouped()

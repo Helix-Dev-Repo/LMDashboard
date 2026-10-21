@@ -1,11 +1,12 @@
 @* Records what this render reflects; ShouldRender compares against it. *@
 @{ _renderedKey = RenderKey; }
-<div class="lm-row @(Link.PingEnabled ? "" : "is-paused")">
-    <a class="lm-row-link" href="@Link.Url" target="_blank" rel="noopener noreferrer">
+<div class="lm-row @(Link.PingEnabled ? "" : "is-paused") @(ConfirmingDelete ? "is-confirming" : "")" role="listitem">
+    @* The visible row is a table of values; a screen reader gets one stable sentence instead. *@
+    <a class="lm-row-link" href="@Link.Url" target="_blank" rel="noopener noreferrer" aria-label="@AccessibleName">
         <span class="lm-dot @StatusKind @(Link.IsPinging ? "is-pinging" : "")" aria-hidden="true"></span>
         <span class="lm-row-main">
-            <span class="lm-row-name">@Link.Name</span>
-            <span class="lm-row-url">@DisplayUrl</span>
+            <span class="lm-row-name" title="@Link.Name">@Link.Name</span>
+            <span class="lm-row-url" title="@Link.Url">@DisplayUrl</span>
         </span>
         @if (ShowType)
         {
@@ -22,8 +23,18 @@
                 <i class="@(sample.Ok ? "" : "is-fail")" style="height: @SampleHeight(sample, scale)%"></i>
             }
         </span>
-        <span class="lm-row-status @StatusKind" title="@StatusText">@StatusText</span>
-        <span class="lm-row-latency @LatencyClass">@FormatLatency(Link.LastPingMs)</span>
+        <span class="lm-row-status @StatusKind" title="@StatusTitle">
+            @if (Link is { PingEnabled: true, LastChecked: not null, LastStatusCode: { } statusCode })
+            {
+                @* Narrow screens hide the phrase and keep the code. *@
+                @statusCode<span class="lm-status-phrase">@StatusLabel(statusCode, Link.LastStatusDescription)</span>
+            }
+            else
+            {
+                @StatusText
+            }
+        </span>
+        <span class="lm-row-latency @LatencyClass" title="Response time">@FormatLatency(Link.LastPingMs)</span>
         <span class="lm-row-interval" title="Checked every @FormatInterval(Link.PingIntervalSeconds)">@FormatInterval(Link.PingIntervalSeconds)</span>
     </a>
     <span class="lm-row-actions">
@@ -82,12 +93,28 @@
         _ => $"{Link.LastStatusCode} {StatusLabel(Link.LastStatusCode.Value, Link.LastStatusDescription)}"
     };
 
-    private string LatencyClass => Link.LastPingMs switch
+    // A failed check's time is how long it took to fail, not a response time worth flagging.
+    private string LatencyClass => (StatusKind, Link.LastPingMs) switch
     {
-        >= 500 => "is-slow",
-        >= 100 => "is-medium",
+        ("down", _) => "is-fail",
+        (_, >= 500) => "is-slow",
         _ => ""
     };
+
+    private string StatusTitle => Link.LastChecked is { } checkedAt
+        ? $"{StatusText} · checked {checkedAt.ToLocalTime():HH:mm:ss}"
+        : StatusText;
+
+    private string AccessibleName
+    {
+        get
+        {
+            var failures = Link.History.Count(s => !s.Ok);
+            var latency = Link.LastPingMs is null ? "" : $", {FormatLatency(Link.LastPingMs)}";
+            var history = failures > 0 ? $", {failures} of last {Link.History.Length} checks failed" : "";
+            return $"{Link.Name}, {StatusText}{latency}{history}, opens in new tab";
+        }
+    }
 
     private string DisplayUrl => Uri.TryCreate(Link.Url, UriKind.Absolute, out var uri)
         ? uri.Authority + (uri.PathAndQuery == "/" ? "" : uri.PathAndQuery)
@@ -109,6 +136,7 @@
     private static string FormatLatency(long? ms) => ms switch
     {
         null => "",
+        0 => "<1ms",
         >= 1000 => (ms.Value / 1000.0).ToString("0.0s", System.Globalization.CultureInfo.InvariantCulture),
         _ => $"{ms}ms"
     };
