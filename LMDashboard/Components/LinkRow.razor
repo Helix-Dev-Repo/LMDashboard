@@ -1,8 +1,13 @@
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+
 @* Records what this render reflects; ShouldRender compares against it. *@
 @{ _renderedKey = RenderKey; }
-<div class="lm-row @(Link.PingEnabled ? "" : "is-paused") @(ConfirmingDelete ? "is-confirming" : "")" role="listitem">
+<div class="lm-row @(Link.PingEnabled ? "" : "is-paused") @(ConfirmingDelete ? "is-confirming" : "") @(_expanded ? "is-expanded" : "") @(TopMatch ? "is-top-match" : "")"
+     role="listitem">
     @* The visible row is a table of values; a screen reader gets one stable sentence instead. *@
-    <a class="lm-row-link" href="@Link.Url" target="_blank" rel="noopener noreferrer" aria-label="@AccessibleName">
+    <a class="lm-row-link" href="@Link.Url" target="_blank" rel="noopener noreferrer" aria-label="@AccessibleName"
+       data-link-id="@Link.Id">
         <span class="lm-dot @StatusKind @(Link.IsPinging ? "is-pinging" : "")" aria-hidden="true"></span>
         <span class="lm-row-main">
             <span class="lm-row-name" title="@Link.Name">@Link.Name</span>
@@ -33,21 +38,34 @@
             {
                 @StatusText
             }
+            @if (DownFor is { } downFor)
+            {
+                <span class="lm-status-since">for @downFor.Short</span>
+            }
         </span>
         <span class="lm-row-latency @LatencyClass" title="Response time">@FormatLatency(Link.LastPingMs)</span>
-        <span class="lm-row-interval" title="Checked every @FormatInterval(Link.PingIntervalSeconds)">@FormatInterval(Link.PingIntervalSeconds)</span>
+        @* Blank while paused: an interval there would suggest checks are still running. *@
+        <span class="lm-row-interval">@(Link.PingEnabled ? FormatInterval(Link.PingIntervalSeconds) : "")</span>
     </a>
+    @* Narrow screens fold the actions behind this toggle; wider screens never show it. *@
+    <button class="lm-btn lm-btn-ghost lm-row-more" aria-expanded="@(_expanded ? "true" : "false")"
+            aria-label="Actions for @Link.Name" @onclick="() => _expanded = !_expanded">
+        <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true" focusable="false">
+            <circle cx="3" cy="8" r="1.5" /><circle cx="8" cy="8" r="1.5" /><circle cx="13" cy="8" r="1.5" />
+        </svg>
+    </button>
     <span class="lm-row-actions">
         <button class="lm-btn lm-btn-ghost lm-btn-sm" aria-label="@(Link.PingEnabled ? "Pause" : "Resume") monitoring @Link.Name"
                 @onclick="OnToggle">@(Link.PingEnabled ? "Pause" : "Resume")</button>
         <button class="lm-btn lm-btn-ghost lm-btn-sm" aria-label="Edit @Link.Name" @onclick="OnEdit">Edit</button>
-        <button class="lm-btn lm-btn-ghost lm-btn-sm lm-btn-danger" aria-label="Delete @Link.Name" @onclick="OnRequestDelete">Delete</button>
+        <button @ref="_deleteButton" class="lm-btn lm-btn-ghost lm-btn-sm lm-btn-danger" aria-label="Delete @Link.Name"
+                @onclick="OnRequestDelete">Delete</button>
     </span>
     @if (ConfirmingDelete)
     {
-        <div class="lm-row-confirm" role="alert">
+        <div class="lm-row-confirm" role="alert" @onkeydown="OnConfirmKeyDown">
             <span>Delete <strong>@Link.Name</strong>?</span>
-            <button class="lm-btn lm-btn-sm" @onclick="OnCancelDelete">Cancel</button>
+            <button @ref="_cancelButton" class="lm-btn lm-btn-sm" @onclick="OnCancelDelete">Cancel</button>
             <button class="lm-btn lm-btn-sm lm-btn-danger-solid" @onclick="OnConfirmDelete">Delete</button>
         </div>
     }
@@ -61,6 +79,10 @@
 
     [Parameter, EditorRequired] public SiteLink Link { get; set; } = default!;
     [Parameter] public bool ShowType { get; set; }
+
+    // The row Enter in the search prompt would open.
+    [Parameter] public bool TopMatch { get; set; }
+
     [Parameter] public bool ConfirmingDelete { get; set; }
     [Parameter] public EventCallback OnToggle { get; set; }
     [Parameter] public EventCallback OnEdit { get; set; }
@@ -68,12 +90,38 @@
     [Parameter] public EventCallback OnConfirmDelete { get; set; }
     [Parameter] public EventCallback OnCancelDelete { get; set; }
 
-    private (long Version, bool ShowType, bool ConfirmingDelete)? _renderedKey;
+    private bool _expanded;
 
-    private (long, bool, bool) RenderKey => (Link.Version, ShowType, ConfirmingDelete);
+    private (long Version, bool ShowType, bool TopMatch, bool ConfirmingDelete, bool Expanded)? _renderedKey;
+
+    private (long, bool, bool, bool, bool) RenderKey => (Link.Version, ShowType, TopMatch, ConfirmingDelete, _expanded);
+
+    private ElementReference _deleteButton;
+    private ElementReference _cancelButton;
+    private bool _wasConfirming;
 
     // The parent re-renders on every store change; only rows whose link changed need to follow.
     protected override bool ShouldRender() => _renderedKey != RenderKey;
+
+    // Opening the confirm puts focus on Cancel, the safe choice for a stray Enter. Closing it
+    // returns focus to Delete, unless the user has already moved on (say, to another row's Delete).
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (ConfirmingDelete == _wasConfirming)
+            return;
+
+        _wasConfirming = ConfirmingDelete;
+        if (ConfirmingDelete)
+            await _cancelButton.FocusAsync();
+        else
+            await JS.InvokeVoidAsync("lmFocus.restore", _deleteButton);
+    }
+
+    private async Task OnConfirmKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+            await OnCancelDelete.InvokeAsync();
+    }
 
     private string StatusKind => Link switch
     {
@@ -101,20 +149,48 @@
         _ => ""
     };
 
-    private string StatusTitle => Link.LastChecked is { } checkedAt
-        ? $"{StatusText} · checked {checkedAt.ToLocalTime():HH:mm:ss}"
-        : StatusText;
+    // How long the link has been failing, as shown ("12m") and as spoken ("12 minutes").
+    // Rows re-render on each check, so this is as fresh as the link's interval.
+    private (string Short, string Long)? DownFor => StatusKind == "down" && Link.FailingSince is { } since
+        ? FormatDuration(DateTime.UtcNow - since)
+        : null;
+
+    private string StatusTitle
+    {
+        get
+        {
+            var title = StatusText;
+            if (StatusKind == "down" && Link.FailingSince is { } since)
+                title += $" · down since {since.ToLocalTime():HH:mm}";
+            if (Link.LastChecked is { } checkedAt)
+                title += $" · checked {checkedAt.ToLocalTime():HH:mm:ss}";
+            if (Link.PingEnabled)
+                title += $" · every {FormatInterval(Link.PingIntervalSeconds)}";
+            return title;
+        }
+    }
 
     private string AccessibleName
     {
         get
         {
             var failures = Link.History.Count(s => !s.Ok);
+            var downFor = DownFor is { } d ? $" for {d.Long}" : "";
             var latency = Link.LastPingMs is null ? "" : $", {FormatLatency(Link.LastPingMs)}";
             var history = failures > 0 ? $", {failures} of last {Link.History.Length} checks failed" : "";
-            return $"{Link.Name}, {StatusText}{latency}{history}, opens in new tab";
+            return $"{Link.Name}, {StatusText}{downFor}{latency}{history}, opens in new tab";
         }
     }
+
+    private static (string Short, string Long) FormatDuration(TimeSpan span) => span switch
+    {
+        { TotalMinutes: < 1 } => ("<1m", "less than a minute"),
+        { TotalHours: < 1 } => ($"{(int)span.TotalMinutes}m", Plural((int)span.TotalMinutes, "minute")),
+        { TotalDays: < 1 } => ($"{(int)span.TotalHours}h", Plural((int)span.TotalHours, "hour")),
+        _ => ($"{(int)span.TotalDays}d", Plural((int)span.TotalDays, "day"))
+    };
+
+    private static string Plural(int n, string unit) => n == 1 ? $"1 {unit}" : $"{n} {unit}s";
 
     private string DisplayUrl => Uri.TryCreate(Link.Url, UriKind.Absolute, out var uri)
         ? uri.Authority + (uri.PathAndQuery == "/" ? "" : uri.PathAndQuery)

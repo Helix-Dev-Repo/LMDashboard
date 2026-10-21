@@ -233,6 +233,27 @@ body {
     font-weight: 700;
 }
 
+.lm-sum-btn {
+    padding: 0;
+    border: none;
+    border-radius: 2px;
+    background: none;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.lm-sum-btn:hover,
+.lm-sum-btn[aria-pressed="true"] {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.lm-sum-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
 /* ── Status dot ── */
 .lm-dot {
     display: inline-block;
@@ -427,9 +448,40 @@ body {
     margin-bottom: 16px;
 }
 
-.lm-search-input {
+/* Search as a command prompt: a ">" mark and a mono field with an accent caret */
+.lm-prompt {
+    position: relative;
+    display: flex;
     flex: 1 1 220px;
     max-width: 320px;
+}
+
+.lm-prompt-mark {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    pointer-events: none;
+}
+
+.lm-search-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-left: 26px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    caret-color: var(--accent);
+}
+
+.theme-classic .lm-search-input {
+    padding-left: 18px;
+}
+
+.theme-classic .lm-prompt-mark {
+    left: 2px;
 }
 
 .lm-toolbar-spacer {
@@ -618,8 +670,78 @@ html:has(.lm-dialog[open]) {
     border-top: none;
 }
 
-.lm-row:hover {
-    background-color: var(--surface-2);
+/* Column heading, like the header line of a terminal report. It reuses the row's column
+   classes for widths and only restyles the text; the first row's top border is its rule. */
+.lm-list-head {
+    display: flex;
+    align-items: center;
+    gap: 0 12px;
+    padding: 7px 8px 5px 14px;
+    color: var(--fg-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    user-select: none;
+}
+
+.lm-list-head-cols {
+    display: flex;
+    flex: 1 1 0;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.lm-dot-slot {
+    flex-shrink: 0;
+    width: 8px;
+}
+
+.lm-list-head-name {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.lm-list-head .lm-badge,
+.lm-list-head .lm-row-status,
+.lm-list-head .lm-row-latency,
+.lm-list-head .lm-row-interval {
+    border-color: transparent;
+    color: inherit;
+    font-size: inherit;
+}
+
+.lm-list-head .lm-spark {
+    align-items: center;
+    height: auto;
+    white-space: nowrap;
+}
+
+/* Set like the real buttons, not the heading, so they take the same width */
+.lm-list-head .lm-row-actions {
+    visibility: hidden;
+    font-family: var(--font-sans);
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+/* The row Enter in the prompt would open */
+.lm-row.is-top-match {
+    background-color: color-mix(in srgb, var(--accent) 8%, var(--surface));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.theme-classic .lm-row.is-top-match {
+    background-color: var(--surface-3);
+    box-shadow: none;
+}
+
+/* Touch screens would leave the tint stuck on the last row tapped */
+@media (hover: hover) {
+    .lm-row:hover {
+        background-color: var(--surface-2);
+    }
 }
 
 .lm-row-link {
@@ -671,9 +793,12 @@ html:has(.lm-dialog[open]) {
     color: var(--fg-muted);
 }
 
+/* A fixed width so the TYPE heading above lines up with it */
 .lm-badge {
     flex-shrink: 0;
+    width: 3.5em;
     padding: 1px 6px;
+    text-align: center;
     border: 1px solid var(--border-strong);
     border-radius: 4px;
     font-family: var(--font-mono);
@@ -720,9 +845,10 @@ html:has(.lm-dialog[open]) {
     white-space: nowrap;
 }
 
-/* Wide enough for the longest standard status, "503 Service Unavailable" */
+/* Wide enough for the longest standard status plus its outage time,
+   "503 Service Unavailable for 12m" */
 .lm-row-status {
-    width: 13rem;
+    width: 16.5rem;
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--fg-muted);
@@ -732,8 +858,13 @@ html:has(.lm-dialog[open]) {
 .lm-row-status.redirect { color: var(--warn); }
 .lm-row-status.down { color: var(--err); }
 
-.lm-row-status .lm-status-phrase {
+.lm-row-status .lm-status-phrase,
+.lm-row-status .lm-status-since {
     margin-left: 1ch;
+}
+
+.lm-row-status .lm-status-since {
+    color: var(--fg-muted);
 }
 
 /* Latency stays out of the status colors: red and amber belong to down and redirect.
@@ -747,8 +878,9 @@ html:has(.lm-dialog[open]) {
 .lm-row-latency.is-slow { color: var(--fg); }
 .lm-row-latency.is-fail { color: var(--fg-subtle); }
 
+/* Fits "1m 30s" */
 .lm-row-interval {
-    width: 3.5rem;
+    width: 3.75rem;
     text-align: right;
     color: var(--fg-subtle);
 }
@@ -786,6 +918,13 @@ html:has(.lm-dialog[open]) {
 /* Pause and Resume differ in width; a fixed width keeps paused rows' columns in line */
 .lm-row-actions .lm-btn:first-child {
     min-width: 64px;
+}
+
+/* Only narrow screens fold the actions away (see the 760px query) */
+.lm-row-more {
+    display: none;
+    width: 40px;
+    padding: 0;
 }
 
 .lm-row-confirm {
@@ -1001,31 +1140,56 @@ html:has(.lm-dialog[open]) {
     border-top-style: dashed;
 }
 
-/* Inverse-video hover */
-.theme-classic .lm-row:hover {
-    background-color: var(--fg);
-}
+/* Inverse-video hover. Failure keeps its color: a down status turns into a red inverse
+   tag, and red dots and failure bars stay red, so the row's meaning survives the hover. */
+@media (hover: hover) {
+    .theme-classic .lm-row:hover {
+        background-color: var(--fg);
+    }
 
-.theme-classic .lm-row:hover * {
-    color: var(--bg);
-    text-shadow: none;
-}
+    .theme-classic .lm-row:hover * {
+        color: var(--bg);
+        text-shadow: none;
+    }
 
-.theme-classic .lm-row:hover .lm-spark i,
-.theme-classic .lm-row:hover .lm-dot {
-    background-color: var(--bg);
+    .theme-classic .lm-row:hover .lm-spark i,
+    .theme-classic .lm-row:hover .lm-dot {
+        background-color: var(--bg);
+    }
+
+    .theme-classic .lm-row:hover .lm-row-status.down {
+        background-color: var(--err);
+    }
+
+    .theme-classic .lm-row:hover .lm-dot.down,
+    .theme-classic .lm-row:hover .lm-spark i.is-fail {
+        background-color: var(--err);
+    }
+
+    /* A green ring would vanish into the green row */
+    .theme-classic .lm-row:hover :focus-visible {
+        outline-color: var(--bg);
+    }
 }
 
 .theme-classic .lm-spark i {
     border-radius: 0;
 }
 
-/* Fixed to the viewport, like the glass of a screen, rather than stretched over the page */
+/* Fixed to the viewport, like the glass of a screen, rather than stretched over the page.
+   The header and footer sit between the vignette and the scanlines: the vignette's dark
+   corners land on the summary and footer, and would pull them below readable contrast. */
+.theme-classic .lm-header,
+.theme-classic .lm-footer {
+    position: relative;
+    z-index: 101;
+}
+
 .lm-dashboard.theme-classic.crt-scanlines::before {
     content: "";
     position: fixed;
     inset: 0;
-    z-index: 100;
+    z-index: 102;
     background: repeating-linear-gradient(
         to bottom,
         transparent 0px,
@@ -1041,7 +1205,7 @@ html:has(.lm-dialog[open]) {
     position: fixed;
     inset: 0;
     z-index: 100;
-    background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.5) 100%);
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.5) 100%);
     pointer-events: none;
 }
 
@@ -1100,6 +1264,11 @@ html:has(.lm-dialog[open]) {
         gap: 8px;
     }
 
+    .lm-row-more {
+        width: 44px;
+        height: 44px;
+    }
+
     .theme-classic .lm-btn,
     .theme-classic .lm-seg {
         min-height: 36px;
@@ -1112,8 +1281,34 @@ html:has(.lm-dialog[open]) {
         padding: 20px 16px;
     }
 
-    .lm-search-input {
+    /* Search and Add link share the first line; the filters wrap below them */
+    .lm-prompt {
+        flex: 1 1 55%;
+        order: -2;
         max-width: none;
+        min-width: 0;
+    }
+
+    /* No columns to head on a phone; the first row closes the list's top edge again */
+    .lm-list-head {
+        display: none;
+    }
+
+    .lm-list-head + .lm-row {
+        border-top: none;
+    }
+
+    .lm-toolbar > .lm-btn-primary {
+        order: -1;
+    }
+
+    /* Slightly tighter so all the filters fit on one line at phone width */
+    .lm-toolbar .lm-seg {
+        padding: 0 9px;
+    }
+
+    .lm-toolbar .lm-chip {
+        padding: 0 10px;
     }
 
     .lm-toolbar-spacer {
@@ -1134,14 +1329,30 @@ html:has(.lm-dialog[open]) {
         display: none;
     }
 
-    .lm-row-main {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0;
+    /* Two lines per link: the name gets the full width on the first, and the URL, status and
+       latency share the second. The name and URL step out of their wrapper into the grid. */
+    .lm-row-link {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto auto;
+        grid-template-areas:
+            "dot name   name   badge"
+            ".   url    status latency";
+        align-items: baseline;
+        gap: 2px 10px;
+        padding: 4px 0;
     }
 
-    /* The name is what you came for; it gets a second line before it gives up letters */
+    .lm-row-main {
+        display: contents;
+    }
+
+    .lm-row-link > .lm-dot {
+        grid-area: dot;
+        align-self: center;
+    }
+
     .lm-row-name {
+        grid-area: name;
         display: -webkit-box;
         max-width: none;
         white-space: normal;
@@ -1151,20 +1362,45 @@ html:has(.lm-dialog[open]) {
         line-clamp: 2;
     }
 
-    /* The code alone carries the status here; the name gets the room. A fixed width keeps
-       the badges in line from row to row. */
+    .lm-row-url {
+        grid-area: url;
+    }
+
+    .lm-badge {
+        grid-area: badge;
+        justify-self: end;
+    }
+
+    /* The code alone carries the status here */
     .lm-row-status {
-        width: 6rem;
+        grid-area: status;
+        width: auto;
     }
 
     .lm-row-status .lm-status-phrase {
         display: none;
     }
 
-    /* They get a line of their own here, so hiding them would only leave a gap */
+    .lm-row-latency {
+        grid-area: latency;
+        width: auto;
+    }
+
+    /* Actions fold behind the More toggle; an open delete confirm keeps them showing */
+    .lm-row-more {
+        display: inline-flex;
+    }
+
     .lm-row-actions {
+        display: none;
         width: 100%;
         justify-content: flex-end;
+        padding-bottom: 4px;
         opacity: 1;
+    }
+
+    .lm-row.is-expanded .lm-row-actions,
+    .lm-row.is-confirming .lm-row-actions {
+        display: flex;
     }
 }

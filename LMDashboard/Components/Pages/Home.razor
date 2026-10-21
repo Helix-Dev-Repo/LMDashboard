@@ -2,22 +2,37 @@
 @rendermode InteractiveServer
 @implements IDisposable
 @using System.Globalization
+@using Microsoft.JSInterop
 @inject LinkStore Store
+@inject IJSRuntime JS
 
-<PageTitle>LM Dashboard</PageTitle>
+@{
+    var summary = GetStatusSummary();
+}
+<PageTitle>@TabTitle(summary.Down)</PageTitle>
 
 <div class="@DashboardClasses" style="--lm-brightness: @_brightness.ToString(CultureInfo.InvariantCulture)">
-    <main class="lm-shell">
+    <div class="lm-shell">
         <header class="lm-header">
             <h1 class="lm-title" tabindex="-1">LM Dashboard<span class="lm-cursor" aria-hidden="true">_</span></h1>
             @* Three zero counts say nothing before the first link exists. *@
             @if (_links.Count > 0)
             {
-                var summary = GetStatusSummary();
                 <p class="lm-summary">
                     <span class="lm-sum @(summary.Up > 0 ? "ok" : "")"><span class="lm-dot ok" aria-hidden="true"></span>@summary.Up up</span>
                     <span class="lm-sum @(summary.Redirect > 0 ? "redirect" : "")"><span class="lm-dot redirect" aria-hidden="true"></span>@summary.Redirect redirect</span>
-                    <span class="lm-sum @(summary.Down > 0 ? "down" : "")"><span class="lm-dot down" aria-hidden="true"></span>@summary.Down down</span>
+                    @if (summary.Down > 0)
+                    {
+                        @* The count is the shortest way to the failing links: it toggles Failing only. *@
+                        <button class="lm-sum lm-sum-btn down" aria-pressed="@Pressed(_showFailingOnly)"
+                                title="@(_showFailingOnly ? "Show all links" : "Show only failing links")" @onclick="ToggleFailing">
+                            <span class="lm-dot down" aria-hidden="true"></span>@summary.Down down
+                        </button>
+                    }
+                    else
+                    {
+                        <span class="lm-sum"><span class="lm-dot down" aria-hidden="true"></span>0 down</span>
+                    }
                     @if (summary.Pending > 0)
                     {
                         <span class="lm-sum"><span class="lm-dot pending" aria-hidden="true"></span>@summary.Pending pending</span>
@@ -31,11 +46,22 @@
             <p class="sr-only" role="status">@_announcement</p>
         </header>
 
+        @* data-search-term tells app.js which search the rendered list reflects, so Enter waits
+           for a pending search to land before opening the top match. *@
+        <main data-search-term="@_searchTerm">
         <div class="lm-toolbar">
             <label class="sr-only" for="lm-search">Search links</label>
-            @* Bound on change; app.js raises change once typing pauses so every keystroke isn't a round trip. *@
-            <input id="lm-search" type="search" class="lm-input lm-search-input" placeholder="Search name or URL"
-                   @bind="_searchTerm" @bind:after="ApplyFilter" />
+            @* A command prompt: typing filters, Enter opens the top match, Esc clears, / jumps
+               here (app.js). Bound on change; app.js raises change once typing pauses so every
+               keystroke isn't a round trip. *@
+            <span class="lm-prompt">
+                <span class="lm-prompt-mark" aria-hidden="true">&gt;</span>
+                <input @ref="_searchInput" id="lm-search" type="search" class="lm-input lm-search-input"
+                       placeholder="filter · enter to open" aria-describedby="lm-search-hint" aria-keyshortcuts="/"
+                       enterkeyhint="go" autocomplete="off" autocapitalize="off" spellcheck="false"
+                       @bind="_searchTerm" @bind:after="FilterChanged" />
+            </span>
+            <span id="lm-search-hint" class="sr-only">Enter opens the first match in a new tab. Escape clears.</span>
 
             <div class="lm-segmented" role="group" aria-label="Link type">
                 <button class="lm-seg @(_filter == LinkFilter.All ? "is-on" : "")" aria-pressed="@Pressed(_filter == LinkFilter.All)" @onclick="() => SetFilter(LinkFilter.All)">All</button>
@@ -105,6 +131,9 @@
             @RenderList(_filtered, showType: _filter == LinkFilter.All)
         }
 
+        <LinkDialog Editing="_editing" IsNew="_isNew" Error="@_formError" OnSave="SaveLink" OnCancel="CancelEdit" />
+        </main>
+
         <footer class="lm-footer">
             <span class="lm-mono">v0.1'ish</span>
             <div class="lm-footer-controls">
@@ -125,9 +154,7 @@
                 <button class="lm-btn lm-btn-sm" title="Change theme" @onclick="CycleTheme">Theme: @_theme</button>
             </div>
         </footer>
-
-        <LinkDialog Editing="_editing" IsNew="_isNew" Error="@_formError" OnSave="SaveLink" OnCancel="CancelEdit" />
-    </main>
+    </div>
 </div>
 
 @code {
@@ -135,7 +162,9 @@
     private static readonly TimeSpan RefreshDelay = TimeSpan.FromMilliseconds(250);
 
     // Matches the slider's min/max; anything the client sends is clamped to this range.
-    private const double MinBrightness = 0.1;
+    // The filter dims text but not the black behind it; below 0.85 red "down" text drops
+    // under 4.5:1 contrast.
+    private const double MinBrightness = 0.85;
     private const double MaxBrightness = 1.5;
 
     private List<SiteLink> _links = [];
@@ -148,6 +177,7 @@
     private bool _grouped;
     private bool _showFailingOnly;
     private string _searchTerm = string.Empty;
+    private Guid? _topMatchId;
     private Guid? _pendingDeleteId;
     private bool _scanlines = true;
     private bool _vignette = true;
@@ -160,6 +190,14 @@
     // announced to screen readers. Links seen for the first time are recorded silently.
     private readonly Dictionary<Guid, bool> _wasFailing = [];
     private string _announcement = string.Empty;
+
+    // After a delete, the row that takes the deleted one's place gets focus (null: the heading).
+    private bool _restoreFocusAfterDelete;
+    private Guid? _focusAfterDelete;
+
+    // Clear search removes its own button, so focus goes back to the search box.
+    private ElementReference _searchInput;
+    private bool _focusSearch;
 
     private enum LinkFilter { All, Internal, External }
 
@@ -179,15 +217,70 @@
     private RenderFragment RenderList(List<SiteLink> links, bool showType) => __builder =>
     {
         <div class="lm-list" role="list">
+            @* A report heading for the columns, built from the row's own classes so it lines up in
+               every theme. Hidden from screen readers: each row's name already says it all. *@
+            <div class="lm-list-head" aria-hidden="true">
+                <span class="lm-list-head-cols">
+                    <span class="lm-dot-slot"></span>
+                    <span class="lm-list-head-name">Name</span>
+                    @if (showType)
+                    {
+                        <span class="lm-badge">Type</span>
+                    }
+                    <span class="lm-spark">Last 20</span>
+                    <span class="lm-row-status">Status</span>
+                    <span class="lm-row-latency">Resp</span>
+                    <span class="lm-row-interval">Every</span>
+                </span>
+                @* Invisible stand-ins hold the width of the row buttons. *@
+                <span class="lm-row-actions">
+                    <span class="lm-btn lm-btn-ghost lm-btn-sm">Pause</span>
+                    <span class="lm-btn lm-btn-ghost lm-btn-sm">Edit</span>
+                    <span class="lm-btn lm-btn-ghost lm-btn-sm">Delete</span>
+                </span>
+            </div>
             @foreach (var link in links)
             {
                 var id = link.Id;
-                <LinkRow @key="id" Link="link" ShowType="showType" ConfirmingDelete="_pendingDeleteId == id"
+                <LinkRow @key="id" Link="link" ShowType="showType" TopMatch="_topMatchId == id" ConfirmingDelete="_pendingDeleteId == id"
                          OnToggle="() => TogglePing(id)" OnEdit="() => EditLink(link)"
                          OnRequestDelete="() => RequestDelete(id)" OnConfirmDelete="ConfirmDelete" OnCancelDelete="CancelDelete" />
             }
         </div>
     };
+
+    // A start page lives in a background tab, so the tab title carries the bad news too.
+    private static string TabTitle(int down) => down > 0 ? $"({down} down) LM Dashboard" : "LM Dashboard";
+
+    private string? _renderedTitle;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var title = TabTitle(GetStatusSummary().Down);
+        if (title != _renderedTitle)
+        {
+            _renderedTitle = title;
+            await JS.InvokeVoidAsync("lmSetTitle", title);
+        }
+
+        if (_focusSearch)
+        {
+            _focusSearch = false;
+            await _searchInput.FocusAsync();
+        }
+
+        if (!_restoreFocusAfterDelete)
+            return;
+
+        _restoreFocusAfterDelete = false;
+        var selector = _focusAfterDelete is { } id ? $".lm-row-link[data-link-id=\"{id}\"]" : ".lm-title";
+        await JS.InvokeVoidAsync("lmFocus.restoreTo", selector, ".lm-title");
+    }
+
+    // Rows in the order they appear on screen; grouping puts internal links first.
+    private List<SiteLink> DisplayOrder() => _filter == LinkFilter.All && _grouped
+        ? [.. _filtered.Where(l => !l.IsExternal), .. _filtered.Where(l => l.IsExternal)]
+        : _filtered;
 
     protected override void OnInitialized()
     {
@@ -277,7 +370,22 @@
         }
 
         if (changes.Count > 0)
-            _announcement = string.Join(". ", changes) + ".";
+            Announce(string.Join(". ", changes) + ".");
+    }
+
+    // Live regions only speak when their text changes, so a repeat of the same message gets a
+    // trailing no-break space to make it differ.
+    private void Announce(string message) =>
+        _announcement = message == _announcement ? message + " " : message;
+
+    // A filter the user just changed says how many links it left, since the list itself
+    // changes silently.
+    private void FilterChanged()
+    {
+        ApplyFilter();
+        var shown = _filtered.Count == 1 ? "1 link shown." : $"{_filtered.Count} links shown.";
+        var opens = _topMatchId is { } id ? $" Enter opens {_filtered.First(l => l.Id == id).Name}." : "";
+        Announce(shown + opens);
     }
 
     private void ApplyFilter()
@@ -299,31 +407,36 @@
                                     || l.Url.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase));
 
         _filtered = result.ToList();
+
+        // Enter in the prompt opens the first row on screen, so it's marked while a search is typed.
+        _topMatchId = string.IsNullOrWhiteSpace(_searchTerm) ? null : DisplayOrder().FirstOrDefault()?.Id;
     }
 
     private void SetFilter(LinkFilter filter)
     {
         _filter = filter;
-        ApplyFilter();
+        FilterChanged();
         PersistPreferences();
     }
 
     private void ClearSearch()
     {
         _searchTerm = string.Empty;
-        ApplyFilter();
+        FilterChanged();
+        _focusSearch = true;
     }
 
     private void ToggleGrouped()
     {
         _grouped = !_grouped;
+        ApplyFilter();
         PersistPreferences();
     }
 
     private void ToggleFailing()
     {
         _showFailingOnly = !_showFailingOnly;
-        ApplyFilter();
+        FilterChanged();
         PersistPreferences();
     }
 
@@ -390,9 +503,16 @@
         _editing.Name = _editing.Name.Trim();
         _editing.Url = _editing.Url.Trim();
 
+        // Each case gets its own message, so fixing one field and saving again announces what's
+        // still missing and moves focus there.
         if (_editing.Name.Length == 0 || _editing.Url.Length == 0)
         {
-            _formError = "Name and URL are required.";
+            _formError = (_editing.Name.Length, _editing.Url.Length) switch
+            {
+                (0, 0) => "Name and URL are required.",
+                (0, _) => "Name is required.",
+                _ => "URL is required."
+            };
             return;
         }
 
@@ -451,8 +571,19 @@
             var id = _pendingDeleteId.Value;
             _pendingDeleteId = null;
 
+            // The next row down takes focus, or the one above when the last row goes.
+            var order = DisplayOrder();
+            var index = order.FindIndex(l => l.Id == id);
+            var neighbour = index < 0 ? null
+                : index + 1 < order.Count ? order[index + 1]
+                : index > 0 ? order[index - 1]
+                : null;
+
             if (!TryStore(() => Store.Remove(id)))
                 return;
+
+            _restoreFocusAfterDelete = true;
+            _focusAfterDelete = neighbour?.Id;
 
             if (_editing is not null && _editing.Id == id)
             {

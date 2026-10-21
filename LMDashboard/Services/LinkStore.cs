@@ -74,6 +74,7 @@ public class LinkStore
                 updated.LastStatusDescription = existing.LastStatusDescription;
                 updated.LastPingMs = existing.LastPingMs;
                 updated.LastChecked = existing.LastChecked;
+                updated.FailingSince = existing.FailingSince;
                 updated.IsPinging = existing.IsPinging;
                 updated.LastPingStarted = existing.LastPingStarted;
                 updated.PingId = existing.PingId;
@@ -140,13 +141,15 @@ public class LinkStore
             // Drop results from a ping that was superseded by a disable or an edit.
             if (link is not null && link.IsPinging && link.PingId == pingId)
             {
+                var now = DateTime.UtcNow;
+                var ok = statusCode is >= 200 and < 400;
                 link.LastStatusCode = statusCode;
                 link.LastStatusDescription = statusDescription;
                 link.LastPingMs = pingMs;
-                link.LastChecked = DateTime.UtcNow;
+                link.LastChecked = now;
+                link.FailingSince = ok ? null : link.FailingSince ?? now;
                 link.IsPinging = false;
-                link.History = [.. link.History.TakeLast(HistoryLength - 1),
-                    new PingSample(pingMs, statusCode is >= 200 and < 400)];
+                link.History = [.. link.History.TakeLast(HistoryLength - 1), new PingSample(pingMs, ok)];
                 link.Version++;
                 found = true;
             }
@@ -204,6 +207,7 @@ public class LinkStore
         link.LastStatusDescription = null;
         link.LastPingMs = null;
         link.LastChecked = null;
+        link.FailingSince = null;
         link.LastPingStarted = null;
         link.History = [];
     }

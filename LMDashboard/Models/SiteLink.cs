@@ -23,6 +23,10 @@ public class SiteLink
     [JsonIgnore]
     public DateTime? LastChecked { get; set; }
 
+    // When the current run of failed checks began; null while the link is healthy.
+    [JsonIgnore]
+    public DateTime? FailingSince { get; set; }
+
     [JsonIgnore]
     public bool IsPinging { get; set; }
 

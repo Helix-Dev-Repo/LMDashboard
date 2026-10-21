@@ -13,13 +13,14 @@
             <div class="lm-form-grid">
                 <div class="lm-field lm-field-name">
                     <label class="lm-field-label" for="lm-name">Name</label>
-                    <input id="lm-name" class="lm-input" @bind="Editing.Name" placeholder="Proxmox" autofocus
-                           aria-describedby="@ErrorId" />
+                    <input @ref="_nameInput" id="lm-name" class="lm-input" @bind="Editing.Name" placeholder="e.g. Proxmox" autofocus
+                           aria-describedby="@ErrorId" aria-invalid="@(NameInvalid ? "true" : null)" />
                 </div>
                 <div class="lm-field lm-field-url">
                     <label class="lm-field-label" for="lm-url">URL</label>
-                    <input id="lm-url" class="lm-input lm-mono" @bind="Editing.Url" placeholder="https://pve.lan:8006"
-                           inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" aria-describedby="@ErrorId" />
+                    <input @ref="_urlInput" id="lm-url" class="lm-input lm-mono" @bind="Editing.Url" placeholder="e.g. https://pve.lan:8006"
+                           inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false"
+                           aria-describedby="@ErrorId" aria-invalid="@(UrlInvalid ? "true" : null)" />
                 </div>
                 @* A radiogroup rather than fieldset/legend: legends ignore flex gap, which put this
                    control out of line with its neighbours. *@
@@ -71,13 +72,33 @@
     [Parameter] public EventCallback OnCancel { get; set; }
 
     private ElementReference _dialog;
+    private ElementReference _nameInput;
+    private ElementReference _urlInput;
     private bool _isOpen;
+    private string? _focusedError;
 
     // Both fields can be at fault ("Name and URL are required"), so both point at the message.
     private string? ErrorId => Error is null ? null : "lm-form-error";
 
+    // Mirrors the checks in Home.SaveLink. A save failure with valid fields (a disk error, a
+    // link deleted elsewhere) marks neither field.
+    private bool NameInvalid => Error is not null && string.IsNullOrWhiteSpace(Editing?.Name);
+
+    private bool UrlInvalid => Error is not null && !(Uri.TryCreate(Editing?.Url?.Trim(), UriKind.Absolute, out var uri)
+        && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps));
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        // A new error moves focus to the first field that caused it.
+        if (Error != _focusedError)
+        {
+            _focusedError = Error;
+            if (NameInvalid)
+                await _nameInput.FocusAsync();
+            else if (UrlInvalid)
+                await _urlInput.FocusAsync();
+        }
+
         if (Editing is not null && !_isOpen)
         {
             _isOpen = true;
